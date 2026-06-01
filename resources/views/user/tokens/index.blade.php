@@ -85,6 +85,10 @@
                                 <td>{{ $token->created_at->format('Y-m-d H:i') }}</td>
                                 <td>
                                     <a href="{{ route('tokens.edit', $token) }}" class="button secondary">Edit</a>
+                                    <form method="POST" action="{{ route('tokens.disable', $token) }}" style="display:inline-block; margin-left:8px;">
+                                        @csrf
+                                        <button type="submit" class="button" style="background: #f97316;">{{ $token->disabled ? 'Disable' : 'Enable' }}</button>
+                                    </form>
                                     <form method="POST" action="{{ route('tokens.destroy', $token) }}" style="display:inline-block; margin-left:8px;">
                                         @csrf
                                         @method('DELETE')

@@ -20,9 +20,9 @@ class AdminAuthController extends BaseController
 
     public function status()
     {
-        $totalAdmins = Admin::count();
-        $totalManagers = Manager::count();
-        $totalUsers = User::count();
+        $totalAdmins = Admin::query()->count();
+        $totalManagers = Manager::query()->count();
+        $totalUsers = User::query()->count();
 
         return view('admin.status', compact('totalAdmins', 'totalManagers', 'totalUsers'));
     }

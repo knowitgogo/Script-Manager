@@ -67,12 +67,25 @@ class UserTokenController extends BaseController
     public function destroy(Token $token)
     {
         $this->authorizeToken($token);
-
-        $token->delete();
+        Token::where('id', $token->id)->delete();
 
         return redirect()
             ->route('tokens.index')
             ->with('success', 'Token deleted successfully.');
+    }
+
+    public function disable(Token $token)
+    {
+        $this->authorizeToken($token);
+
+        $token->disabled = !$token->disabled;
+        $token->save();
+
+        $message = $token->disabled ? 'Token disabled.' : 'Token enabled.';
+
+        return redirect()
+            ->route('tokens.index')
+            ->with('success', $message);
     }
 
     protected function authorizeToken(Token $token): void
