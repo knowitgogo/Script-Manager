@@ -13,6 +13,11 @@ class Token extends Model
         'user_id',
         'name',
         'token',
+        'disabled',
+    ];
+
+    protected $casts = [
+        'disabled' => 'boolean',
     ];
 
     public function user()

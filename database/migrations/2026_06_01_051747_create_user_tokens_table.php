@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('token')->unique();
+            $table->boolean('disabled')->default(false);
             $table->timestamps();
         });
     }

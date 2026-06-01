@@ -61,6 +61,9 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/tokens/{token}', [UserTokenController::class, 'destroy'])
         ->name('tokens.destroy');
+
+    Route::post('/tokens/{token}/disable', [UserTokenController::class, 'disable'])
+        ->name('tokens.disable');
 });
 
 Route::get('/admin/register', [AdminAuthController::class, 'showRegistrationForm'])
