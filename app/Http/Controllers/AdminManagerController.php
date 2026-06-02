@@ -9,9 +9,20 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminManagerController extends BaseController
 {
-    public function index()
+    public function index(Request $request)
     {
-        $managers = Manager::orderBy('created_at', 'desc')->get();
+        $query = Manager::query();
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $managers = $query->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.managers.index', compact('managers'));
     }
@@ -55,7 +66,7 @@ class AdminManagerController extends BaseController
 
         $manager->name = $request->name;
         $manager->email = $request->email;
-    
+
         if ($request->filled('password')) {
             $manager->password = Hash::make($request->password);
         }
@@ -69,7 +80,7 @@ class AdminManagerController extends BaseController
 
     public function destroy(Manager $manager)
     {
-        $manager->delete();
+        Manager::whereKey($manager->id)->delete();
 
         return redirect()
             ->route('admin.managers.index')

@@ -1,6 +1,6 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
-@section('title', 'Admin Login')
+@section('title', 'Manager Login')
 
 @section('styles')
     <style>
@@ -70,11 +70,9 @@
     </style>
 @endsection
 
-@section('admin_content')
-
+@section('content')
     <div class="container">
-        <h1>Admin Portal Login</h1>
-        <p style="margin-bottom:18px; color:#475569;">Admins and managers can sign in here.</p>
+        <h1>Manager Login</h1>
 
         @if ($errors->any())
             <div class="message errors">
@@ -87,7 +85,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('admin.login.post') }}">
+        <form method="POST" action="{{ route('manager.login.post') }}">
             @csrf
 
             <div class="field">
@@ -112,8 +110,7 @@
         </form>
 
         <p style="margin-top:18px;">
-            <a href="{{ route('admin.register') }}">Create an admin account</a>
+            Manager accounts are created by admins. If you need access, please ask your administrator.
         </p>
     </div>
-
 @endsection

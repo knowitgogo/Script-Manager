@@ -1,17 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit User</title>
-    <style>
+@extends('layouts.admin')
+
+@section('title', "Edit User")
+
+@section('styles')
+<style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: ui-sans-serif, system-ui, sans-serif; background: #f8fafc; color: #111827; }
         nav { background: #1e293b; color: white; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
         nav a { color: white; text-decoration: none; padding: 8px 16px; margin: 0 8px; border-radius: 6px; }
-        nav a:hover { background: #334155; }
-        nav .logout { background: #dc2626; }
-        nav .logout:hover { background: #b91c1c; }
+        nav a:hover { background: #64748b; }
+        nav .logout { background: #2563eb; }
+        nav .logout:hover { background: #1d4ed8; }
         .container { max-width: 540px; margin: 32px auto; padding: 20px; }
         .card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 28px; box-shadow: 0 10px 30px rgba(15,23,42,.08); }
         .field { margin-bottom: 18px; }
@@ -26,30 +25,11 @@
         .errors { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
         .errors li { margin-bottom: 6px; }
     </style>
-</head>
-<body>
-    <nav>
-        <div>
-            <a href="{{ route('admin.dashboard') }}">Dashboard</a>
-            <a href="{{ route('admin.status') }}">Status</a>
-            <a href="{{ route('admin.requests') }}">Requests</a>
-            <a href="{{ route('admin.token.generate') }}">Generate Token</a>
-            <a href="{{ route('admin.users.index') }}">Users</a>
-            <a href="{{ route('admin.managers.index') }}">Managers</a>
-        </div>
-        <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="color: white; font-size: 14px;">
-                <div style="font-weight: 600;">{{ auth('admin')->user()->name ?? 'Admin' }}</div>
-                <div style="font-size: 12px; opacity: 0.9;">{{ auth('admin')->user()->email ?? '' }}</div>
-            </div>
-            <form method="POST" action="{{ route('admin.logout') }}" style="display:inline;">
-                @csrf
-                <button type="submit" class="button logout" style="border: none; padding: 8px 16px;">Logout</button>
-            </form>
-        </div>
-    </nav>
+@endsection
 
-    <div class="container">
+@section('admin_content')
+
+<div class="container">
         <div class="card">
             <h1>Edit User</h1>
 
@@ -100,5 +80,5 @@
             </form>
         </div>
     </div>
-</body>
-</html>
+
+@endsection

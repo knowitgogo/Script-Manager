@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Register</title>
-    <style>
+@extends('layouts.admin')
+
+@section('title', "Admin Register")
+
+@section('styles')
+<style>
         body { font-family: ui-sans-serif, system-ui, sans-serif; background: #f8fafc; color: #111827; padding: 32px; }
         .container { max-width: 420px; margin: 0 auto; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 28px; box-shadow: 0 10px 30px rgba(15,23,42,.08); }
         .field { margin-bottom: 18px; }
@@ -17,9 +16,11 @@
         .errors { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
         .errors li { margin-bottom: 6px; }
     </style>
-</head>
-<body>
-    <div class="container">
+@endsection
+
+@section('admin_content')
+
+<div class="container">
         <h1>Admin Register</h1>
 
         @if (session('success'))
@@ -63,5 +64,5 @@
             <button class="button" type="submit">Register</button>
         </form>
     </div>
-</body>
-</html>
+
+@endsection

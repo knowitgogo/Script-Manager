@@ -62,10 +62,22 @@ class AdminUserController extends BaseController
 
     public function destroy(User $user)
     {
-        $user->delete();
+        User::query()->whereKey($user->id)->delete();
 
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'User deleted successfully.');
+    }
+
+    public function toggleStatus(User $user)
+    {
+        $user->disabled = ! $user->disabled;
+        $user->save();
+
+        $message = $user->disabled ? 'User disabled successfully.' : 'User enabled successfully.';
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', $message);
     }
 }

@@ -5,9 +5,11 @@ use App\Models\Admin;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminManagerController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\ManagerAuthController;
 use App\Http\Controllers\UserAuthController;
 use App\Http\Controllers\UserTokenController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\ManagerMiddleware;
 
 Route::get('/test-admin', function () {
     $admin = Admin::create([
@@ -81,6 +83,29 @@ Route::post('/admin/login', [AdminAuthController::class, 'login'])
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])
     ->name('admin.logout');
 
+Route::get('/manager/login', [ManagerAuthController::class, 'showLoginForm'])
+    ->name('manager.login');
+
+Route::post('/manager/login', [ManagerAuthController::class, 'login'])
+    ->name('manager.login.post');
+
+Route::post('/manager/logout', [ManagerAuthController::class, 'logout'])
+    ->name('manager.logout');
+
+Route::middleware(ManagerMiddleware::class)->group(function () {
+    Route::get('/manager/dashboard', [ManagerAuthController::class, 'dashboard'])
+        ->name('manager.dashboard');
+
+    Route::get('/manager/users', [ManagerAuthController::class, 'users'])
+        ->name('manager.users.index');
+
+    Route::post('/manager/users/{user}/disable', [ManagerAuthController::class, 'disable'])
+        ->name('manager.users.disable');
+
+    Route::post('/manager/users/{user}/enable', [ManagerAuthController::class, 'enable'])
+        ->name('manager.users.enable');
+});
+
 Route::middleware(AdminMiddleware::class)->group(function () {
     Route::get('/admin/dashboard', [AdminAuthController::class, 'dashboard'])
         ->name('admin.dashboard');
@@ -100,6 +125,9 @@ Route::middleware(AdminMiddleware::class)->group(function () {
     Route::get('/admin/users', [AdminAuthController::class, 'users'])
         ->name('admin.users.index');
 
+    Route::get('/admin/tokens', [AdminAuthController::class, 'tokens'])
+        ->name('admin.tokens.index');
+
     Route::get('/admin/users/create', [AdminUserController::class, 'create'])
         ->name('admin.users.create');
 
@@ -114,6 +142,9 @@ Route::middleware(AdminMiddleware::class)->group(function () {
 
     Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy'])
         ->name('admin.users.destroy');
+
+    Route::post('/admin/users/{user}/status', [AdminUserController::class, 'toggleStatus'])
+        ->name('admin.users.toggle-status');
 
     Route::get('/admin/managers', [AdminManagerController::class, 'index'])
         ->name('admin.managers.index');

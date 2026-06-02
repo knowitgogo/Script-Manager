@@ -12,14 +12,16 @@ class UserTokenController extends BaseController
 {
     public function index()
     {
-        $tokens = Auth::user()->tokens()->latest()->get();
+        $tokens = Auth::user()->tokens()->latest()->paginate(10);
 
         return view('user.tokens.index', compact('tokens'));
     }
 
     public function create()
     {
-        return view('user.token');
+        $tokens = Auth::user()->tokens()->latest()->paginate(10);
+
+        return view('user.tokens.index', compact('tokens'))->with('showGenerate', true);
     }
 
     public function store(Request $request)
@@ -67,7 +69,7 @@ class UserTokenController extends BaseController
     public function destroy(Token $token)
     {
         $this->authorizeToken($token);
-        Token::where('id', $token->id)->delete();
+        Token::query()->where('id', '=', $token->id)->delete();
 
         return redirect()
             ->route('tokens.index')

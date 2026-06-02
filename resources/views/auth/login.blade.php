@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <style>
+@extends('layouts.app')
+
+@section('title', "Login")
+
+@section('styles')
+<style>
         body { font-family: ui-sans-serif, system-ui, sans-serif; background: #f8fafc; color: #111827; padding: 32px; }
         .container { max-width: 420px; margin: 0 auto; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 28px; box-shadow: 0 10px 30px rgba(15,23,42,.08); }
         .field { margin-bottom: 18px; }
@@ -19,9 +18,11 @@
         .helper { margin-top: 16px; font-size: 14px; color: #475569; }
         .helper a { color: #2563eb; text-decoration: none; }
     </style>
-</head>
-<body>
-    <div class="container">
+@endsection
+
+@section('content')
+
+<div class="container">
         <h1>Login</h1>
 
         @if (session('success'))
@@ -57,5 +58,5 @@
 
         <p class="helper">Don’t have an account? <a href="{{ route('register') }}">Register here</a>.</p>
     </div>
-</body>
-</html>
+
+@endsection

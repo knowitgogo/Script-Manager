@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Admin;
 use App\Models\Manager;
+use App\Models\Token;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
@@ -15,16 +16,18 @@ class AdminAuthController extends BaseController
 {
     public function dashboard()
     {
-        return view('admin.dashboard');
+        $totalTokens = Token::query()->count('*');
+
+        return view('admin.dashboard', compact('totalTokens'));
     }
 
     public function status()
     {
-        $totalAdmins = Admin::query()->count();
-        $totalManagers = Manager::query()->count();
-        $totalUsers = User::query()->count();
+        $totalAdmins = Admin::query()->count('*');
+        $totalManagers = Manager::query()->count('*');
+        $totalUsers = User::query()->count('*');
 
-        return view('admin.status', compact('totalAdmins', 'totalManagers', 'totalUsers'));
+        return view('admin.status', compact(    'totalAdmins', 'totalManagers', 'totalUsers'));
     }
 
     public function requests()
@@ -34,9 +37,38 @@ class AdminAuthController extends BaseController
 
     public function users()
     {
-        $users = User::orderBy('created_at', 'desc')->get();
+        $query = User::query();
+
+        if ($search = request('search')) {
+            $query->where(function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.users.index', compact('users'));
+    }
+
+    public function tokens(Request $request)
+    {
+        $query = Token::query()->with('user');
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('token', 'like', "%{$search}%");
+            });
+        }
+
+        $tokens = $query->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.tokens.index', compact('tokens'));
     }
 
     public function showTokenGenerateForm()
@@ -95,6 +127,12 @@ class AdminAuthController extends BaseController
             $request->session()->regenerate();
 
             return redirect()->intended(route('admin.dashboard'));
+        }
+
+        if (Auth::guard('manager')->attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+
+            return redirect()->intended(route('manager.dashboard'));
         }
 
         return back()->withErrors([
