@@ -60,5 +60,13 @@
                 <p>Disabled users: <strong>{{ $disabledUsers }}</strong></p>
             </div>
         </div>
+
+        <div class="card">
+            <h2>Disabled Users</h2>
+            <p>View disabled users in the system.</p>
+            <a href="{{ route('manager.users.disabled') }}" class="button">View Disabled Users</a>
+        </div>
+
+    </div>
     </div>
 @endsection

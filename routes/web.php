@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\ManagerAuthController;
 use App\Http\Controllers\UserAuthController;
 use App\Http\Controllers\UserTokenController;
+
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\ManagerMiddleware;
 
@@ -66,6 +67,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/tokens/{token}/disable', [UserTokenController::class, 'disable'])
         ->name('tokens.disable');
+    
 });
 
 Route::get('/admin/register', [AdminAuthController::class, 'showRegistrationForm'])
@@ -104,7 +106,10 @@ Route::middleware(ManagerMiddleware::class)->group(function () {
 
     Route::post('/manager/users/{user}/enable', [ManagerAuthController::class, 'enable'])
         ->name('manager.users.enable');
-});
+
+    Route::get('/manager/users/disabled', [ManagerAuthController::class, 'disabledUsers'])
+        ->name('manager.users.disabled');
+        });
 
 Route::middleware(AdminMiddleware::class)->group(function () {
     Route::get('/admin/dashboard', [AdminAuthController::class, 'dashboard'])
@@ -130,6 +135,9 @@ Route::middleware(AdminMiddleware::class)->group(function () {
 
     Route::get('/admin/users/create', [AdminUserController::class, 'create'])
         ->name('admin.users.create');
+// deleted users List
+    Route::get('/admin/users/deleted', [AdminUserController::class, 'deleted'])
+    ->name('admin.users.deleted');
 
     Route::post('/admin/users', [AdminUserController::class, 'store'])
         ->name('admin.users.store');
@@ -142,7 +150,11 @@ Route::middleware(AdminMiddleware::class)->group(function () {
 
     Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy'])
         ->name('admin.users.destroy');
+Route::post('/admin/users/{id}/restore', [AdminUserController::class, 'restore'])
+    ->name('admin.users.restore');
 
+Route::delete('/admin/users/{id}/force-delete', [AdminUserController::class, 'forceDelete'])
+    ->name('admin.users.force-delete');
     Route::post('/admin/users/{user}/status', [AdminUserController::class, 'toggleStatus'])
         ->name('admin.users.toggle-status');
 
@@ -163,4 +175,9 @@ Route::middleware(AdminMiddleware::class)->group(function () {
 
     Route::post('/admin/managers', [AdminManagerController::class, 'store'])
         ->name('admin.managers.store');
+        Route::get('/admin/managers/deleted', [AdminManagerController::class, 'deleted'])
+    ->name('admin.managers.deleted');
+    Route::post('/admin/managers/{id}/restore', [AdminManagerController::class, 'restore'])
+    ->name('admin.managers.restore');
+    
 });

@@ -61,13 +61,26 @@ class AdminUserController extends BaseController
     }
 
     public function destroy(User $user)
-    {
-        User::query()->whereKey($user->id)->delete();
+{
+    $user->whereKey($user->id)->delete();
 
-        return redirect()
-            ->route('admin.users.index')
-            ->with('success', 'User deleted successfully.');
-    }
+    return redirect()
+        ->route('admin.users.index')
+        ->with('success', 'User deleted successfully.');
+}
+public function restore($id)
+{
+    User::onlyTrashed()->findOrFail($id)->restore();
+
+    return back()->with('success', 'User restored successfully.');
+}
+
+public function deleted()
+{
+    $users = User::onlyTrashed()->get();
+
+    return view('admin.users.deleted', compact('users'));
+}
 
     public function toggleStatus(User $user)
     {

@@ -167,6 +167,31 @@
             background: #f8fafc;
             cursor: not-allowed;
         }
+
+        .page-jump {
+            margin-top: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        .page-jump form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .page-jump input {
+            width: 90px;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+        }
     </style>
 @endsection
 
@@ -194,6 +219,7 @@
                     @endif
                 </form>
                 <a href="{{ route('admin.managers.create') }}" class="button">Create Manager</a>
+                <a href="{{ route('admin.managers.deleted') }}" class="button secondary">Show Deleted Managers</a>
             </div>
 
             <table>
@@ -231,17 +257,31 @@
                 </tbody>
             </table>
             <div class="pagination-simple">
-                @if (!$users->onFirstPage())
-                    <a href="{{ $users->previousPageUrl() }}">←</a>
+                @if (!$managers->onFirstPage())
+                    <a href="{{ $managers->previousPageUrl() }}">←</a>
                 @endif
 
                 <span>
-                    {{ $users->currentPage() }} / {{ $users->lastPage() }}
+                    {{ $managers->currentPage() }} / {{ $managers->lastPage() }}
                 </span>
 
-                @if ($users->hasMorePages())
-                    <a href="{{ $users->nextPageUrl() }}">→</a>
+                @if ($managers->hasMorePages())
+                    <a href="{{ $managers->nextPageUrl() }}">→</a>
                 @endif
+            </div>
+            <div class="page-jump">
+                <span>
+                    Page {{ $managers->currentPage() }} of {{ $managers->lastPage() }}
+                </span>
+
+                <form method="GET" action="{{ route('admin.managers.index') }}">
+                    @foreach (request()->except('page') as $key => $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endforeach
+                    <input type="number" name="page" min="1" max="{{ $managers->lastPage() }}"
+                        value="{{ $managers->currentPage() }}">
+                    <button type="submit" class="button secondary">Go</button>
+                </form>
             </div>
         </div>
     </div>

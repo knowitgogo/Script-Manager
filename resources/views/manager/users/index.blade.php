@@ -112,6 +112,20 @@
             cursor: not-allowed;
         }
 
+        .page-jump form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .page-jump input {
+            width: 90px;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+        }
+
         .footer {
             margin-top: 40px;
             background: #1e293b;
@@ -224,9 +238,12 @@
             </span>
 
             <form method="GET" action="{{ route('manager.users.index') }}">
+                @foreach (request()->except('page') as $key => $value)
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endforeach
                 <input type="number" name="page" min="1" max="{{ $users->lastPage() }}"
                     value="{{ $users->currentPage() }}">
-                <button type="submit">Go</button>
+                <button type="submit" class="button secondary">Go</button>
             </form>
         </div>
     </div>

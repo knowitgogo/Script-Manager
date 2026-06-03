@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
+
 class UserAuthController extends BaseController
 {
     public function showRegistrationForm()
@@ -98,4 +99,13 @@ class UserAuthController extends BaseController
 
         return back()->with('token', $token);
     }
+    
+public function deleted()
+{
+    $users = User::onlyTrashed()->get();
+
+    return view('admin.users.deleted', compact('users'));
 }
+    
+}
+

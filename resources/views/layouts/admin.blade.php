@@ -104,6 +104,7 @@
                     <a href="{{ route('admin.tokens.index') }}">Tokens</a>
                     <a href="{{ route('admin.managers.index') }}">Managers</a>
                     <a href="{{ route('admin.managers.create') }}">Create Manager</a>
+                    <a href="{{ route('admin.users.deleted') }}">Deleted Users</a>
                 </div>
 
                 <div class="nav-links" style="gap: 12px;">

@@ -86,4 +86,20 @@ class AdminManagerController extends BaseController
             ->route('admin.managers.index')
             ->with('success', 'Manager deleted successfully.');
     }
+    public function deleted()
+{
+    $managers = Manager::onlyTrashed()
+        ->orderBy('deleted_at', 'desc')
+        ->paginate(10);
+
+    return view('admin.managers.deleted', compact('managers'));
+}
+public function restore($id)
+{
+    Manager::onlyTrashed()
+        ->findOrFail($id)
+        ->restore();
+
+    return back()->with('success', 'Manager restored successfully.');
+}
 }

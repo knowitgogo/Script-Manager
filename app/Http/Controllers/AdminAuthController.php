@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AdminAuthController extends BaseController
-{
+{   
     public function dashboard()
     {
         $totalTokens = Token::query()->count('*');
@@ -27,7 +27,7 @@ class AdminAuthController extends BaseController
         $totalManagers = Manager::query()->count('*');
         $totalUsers = User::query()->count('*');
 
-        return view('admin.status', compact(    'totalAdmins', 'totalManagers', 'totalUsers'));
+        return view('admin.status', compact('totalAdmins', 'totalManagers', 'totalUsers'));
     }
 
     public function requests()
@@ -36,21 +36,13 @@ class AdminAuthController extends BaseController
     }
 
     public function users()
-    {
-        $query = User::query();
+        {
+    $users = User::search(request('search'))
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
-        if ($search = request('search')) {
-            $query->where(function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-
-        $users = $query->orderBy('created_at', 'desc')
-            ->paginate(10)
-            ->withQueryString();
-
-        return view('admin.users.index', compact('users'));
+    return view('admin.users.index', compact('users'));
     }
 
     public function tokens(Request $request)

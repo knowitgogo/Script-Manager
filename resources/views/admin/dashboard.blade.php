@@ -119,6 +119,17 @@
                 <p>Add a new manager to the system</p>
                 <a href="{{ route('admin.managers.create') }}" class="button">Create Manager</a>
             </div>
+            <div class="card">
+                <h2>Show Deleted Users</h2>
+                <p>View users who have been deleted</p>
+                <a href="{{ route('admin.users.deleted') }}" class="button">Show Deleted Users</a>
+            </div>
+            <div class="card">
+                <h2>Show Deleted Managers</h2>
+                <p>View managers who have been deleted</p>
+                <a href="{{ route('admin.managers.deleted') }}" class="button">Show Deleted Managers</a>
+            </div>
+
         </div>
     </div>
 @endsection

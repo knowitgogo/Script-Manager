@@ -173,6 +173,31 @@
             background: #f8fafc;
             cursor: not-allowed;
         }
+
+        .page-jump {
+            margin-top: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        .page-jump form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .page-jump input {
+            width: 90px;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+        }
     </style>
 @endsection
 
@@ -265,6 +290,20 @@
                     @else
                         <span class="disabled">Next →</span>
                     @endif
+                </div>
+                <div class="page-jump">
+                    <span>
+                        Page {{ $users->currentPage() }} of {{ $users->lastPage() }}
+                    </span>
+
+                    <form method="GET" action="{{ route('admin.users.index') }}">
+                        @foreach (request()->except('page') as $key => $value)
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endforeach
+                        <input type="number" name="page" min="1" max="{{ $users->lastPage() }}"
+                            value="{{ $users->currentPage() }}">
+                        <button type="submit" class="button secondary">Go</button>
+                    </form>
                 </div>
                 <div style="margin-top:15px; font-size:14px; color:#64748b;">
                     Total Records: {{ $users->total() }} |
