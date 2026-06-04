@@ -1,110 +1,29 @@
 @extends('layouts.user')
 
-@section('title', 'My Tokens')
+@section('title', __('messages.my_tokens'))
 
 @section('styles')
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: ui-sans-serif, system-ui, sans-serif;
-            background: #f8fafc;
-            color: #111827;
-        }
-
-        nav {
-            background: #1e293b;
-            color: white;
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            margin: 0 8px;
-            border-radius: 6px;
-        }
-
-        nav a:hover {
-            background: #64748b;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 32px auto;
-            padding: 20px;
-        }
-
-        .card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 28px;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, .08);
-        }
-
-        .button {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .button:hover {
-            background: #1d4ed8;
-        }
-
-        .secondary {
-            background: #e2e8f0;
-            color: #0f172a;
-        }
-
         .table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 24px;
         }
 
-        .table th,
-        .table td {
+        .table th, .table td {
             padding: 14px 16px;
-            border: 1px solid #e2e8f0;
             text-align: left;
         }
 
         .table th {
-            background: #f8fafc;
+            background: var(--color-surface-alt);
         }
 
         .empty {
             padding: 24px;
-            background: #f8fafc;
+            background: var(--color-surface-alt);
             border-radius: 12px;
-        }
-
-        .message {
-            margin-bottom: 16px;
-            padding: 12px 14px;
-            border-radius: 8px;
-        }
-
-        .success {
-            background: #ecfdf5;
-            color: #166534;
-            border: 1px solid #bbf7d0;
+            color: var(--color-text-muted);
         }
 
         .modal-overlay {
@@ -118,7 +37,7 @@
         }
 
         .modal {
-            background: white;
+            background: var(--color-surface);
             border-radius: 16px;
             max-width: 520px;
             width: 100%;
@@ -139,7 +58,16 @@
             font-size: 24px;
             line-height: 1;
             cursor: pointer;
-            color: #475569;
+            color: var(--color-text-muted);
+        }
+
+        .button.secondary {
+            background: var(--color-surface-alt);
+            color: var(--color-text);
+        }
+
+        .button.secondary:hover {
+            background: var(--color-border);
         }
     </style>
 @endsection
@@ -150,19 +78,19 @@
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
                 <div>
-                    <h1>My Tokens</h1>
-                    <p>View and manage the tokens you've created.</p>
+                    <h1>{{ __('messages.my_tokens') }}</h1>
+                    <p>{{ __('messages.my_tokens') }}</p>
                 </div>
-                <button type="button" class="button" onclick="openTokenModal()">Create New Token</button>
+                <button type="button" class="button" onclick="openTokenModal()">{{ __('messages.create_new_token') }}</button>
             </div>
 
             @if (session('success'))
-                <div class="message success">{{ session('success') }}</div>
+                <div class="alert alert-success">{{ session('success') }}</div>
             @endif
 
             @if (session('token'))
-                <div class="message success">
-                    <strong>New token created:</strong>
+                <div class="alert alert-success">
+                    <strong>{{ __('messages.new_token_created') }}</strong>
                     <div style="margin-top:8px; word-break: break-all; font-family: monospace;">{{ session('token') }}</div>
                 </div>
             @endif
@@ -171,7 +99,7 @@
             <div id="token-modal" class="modal-overlay" style="display:none;">
                 <div class="modal">
                     <div class="modal-header">
-                        <h2>Create Token</h2>
+                        <h2>{{ __('messages.create_new_token') }}</h2>
                         <button type="button" class="modal-close" onclick="closeTokenModal()">&times;</button>
                     </div>
                     <div class="modal-body">
@@ -179,12 +107,16 @@
                             @csrf
 
                             <div class="field">
-                                <label class="label" for="name">Token Name</label>
-                                <input class="input" id="name" name="name" type="text"
-                                    placeholder="e.g., My App Token" required />
+                                <label class="label" for="name">{{ __('messages.create_new_token') }}</label>
+                                <input class="input @error('name') is-invalid @enderror" id="name" name="name" type="text"
+                                    value="{{ old('name') }}"
+                                    placeholder="{{ __('messages.token_name_placeholder') }}" required />
+                                @error('name')
+                                    <span class="field-error">{{ $message }}</span>
+                                @enderror
                             </div>
 
-                            <button class="button" type="submit">Generate Token</button>
+                            <button class="button" type="submit">{{ __('messages.generate') }}</button>
                         </form>
                     </div>
                 </div>
@@ -192,16 +124,16 @@
 
             @if ($tokens->isEmpty())
                 <div class="empty">
-                    <p>No tokens found yet. Create a token to get started.</p>
+                    <p>{{ __('messages.no_tokens_found') }}</p>
                 </div>
             @else
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Token</th>
-                            <th>Created</th>
-                            <th>Actions</th>
+                            <th>{{ __('messages.label_name') }}</th>
+                            <th>{{ __('messages.token') }}</th>
+                            <th>{{ __('messages.created') }}</th>
+                            <th>{{ __('messages.label_actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -211,16 +143,18 @@
                                 <td style="font-family:monospace;">{{ $token->token }}</td>
                                 <td>{{ $token->created_at->format('Y-m-d H:i') }}</td>
                                 <td>
-                                    <a href="{{ route('tokens.edit', $token) }}" class="button secondary">Edit</a>
+                                    <a href="{{ route('tokens.edit', $token) }}"
+                                        class="button secondary">{{ __('messages.edit') }}</a>
                                     <form method="POST" action="{{ route('tokens.destroy', $token) }}"
                                         style="display:inline-block; margin-left:8px;">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="button" style="background:#2563eb;">Delete</button>
+                                        <button type="submit" class="button danger"
+                                            style="margin-left:8px;">{{ __('messages.delete') }}</button>
                                     </form>
 
-                                    <button class="button" style="background:#2563eb; margin-left:8px;"
-                                        onclick="navigator.clipboard.writeText('{{ $token->token }}')">Copy</button>
+                                    <button class="button secondary" style="margin-left:8px;"
+                                        onclick="navigator.clipboard.writeText('{{ $token->token }}')">{{ __('messages.copy') }}</button>
                                 </td>
                             </tr>
                         @endforeach
@@ -259,7 +193,7 @@
             button.addEventListener('click', function() {
                 const token = this.getAttribute('onclick').match(/'([^']+)'/)[1];
                 navigator.clipboard.writeText(token).then(() => {
-                    alert('Token copied to clipboard!');
+                    alert('{{ __('messages.token_copied') }}');
                 }).catch(err => {
                     alert('Failed to copy token: ' + err);
                 });

@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Deleted Managers')
+@section('title', __('messages.deleted_managers'))
 
 @section('admin_content')
     <div class="container">
@@ -8,27 +8,27 @@
 
             <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                    <h1>Deleted Managers</h1>
-                    <p>All soft deleted managers.</p>
+                    <h1>{{ __('messages.deleted_managers') }}</h1>
+                    <p>{{ __('messages.deleted_managers') }}.</p>
                 </div>
 
                 <a href="{{ route('admin.managers.index') }}" class="button">
-                    Active Managers
+                    {{ __('messages.active_managers') }}
                 </a>
             </div>
 
             @if ($managers->isEmpty())
                 <div class="empty">
-                    No deleted managers found.
+                    {{ __('messages.no_deleted_managers') }}
                 </div>
             @else
                 <table>
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Deleted At</th>
-                            <th>Actions</th>
+                            <th>{{ __('messages.label_name') }}</th>
+                            <th>{{ __('messages.label_email') }}</th>
+                            <th>{{ __('messages.deleted_at') ?? 'Deleted At' }}</th>
+                            <th>{{ __('messages.label_actions') }}</th>
                         </tr>
                     </thead>
 
@@ -46,7 +46,7 @@
                                             @csrf
 
                                             <button type="submit" class="button success">
-                                                Restore
+                                                {{ __('messages.restore') }}
                                             </button>
                                         </form>
 

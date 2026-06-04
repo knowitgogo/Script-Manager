@@ -2,30 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Admin;
-use App\Models\Manager;
-use App\Models\Token;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Services\AuthService;
+use App\Services\AdminService;
+use App\Services\ManagerService;
+use App\Services\TokenService;
+use App\Services\UserService;
 
 class AdminAuthController extends BaseController
 {   
-    public function dashboard()
+    public function dashboard(TokenService $tokenService, UserService $userService)
     {
-        $totalTokens = Token::query()->count('*');
+        $totalTokens = $tokenService->totalCount();
+        $totalUsers = $userService->totalCount();
 
-        return view('admin.dashboard', compact('totalTokens'));
+        return view('admin.dashboard', compact('totalTokens', 'totalUsers'));
     }
 
-    public function status()
+    public function status(AdminService $adminService, ManagerService $managerService, UserService $userService)
     {
-        $totalAdmins = Admin::query()->count('*');
-        $totalManagers = Manager::query()->count('*');
-        $totalUsers = User::query()->count('*');
+        $totalAdmins = $adminService->totalAdmins();
+        $totalManagers = $managerService->totalCount();
+        $totalUsers = $userService->totalCount();
 
         return view('admin.status', compact('totalAdmins', 'totalManagers', 'totalUsers'));
     }
@@ -35,30 +36,16 @@ class AdminAuthController extends BaseController
         return view('admin.requests');
     }
 
-    public function users()
-        {
-    $users = User::search(request('search'))
-        ->latest()
-        ->paginate(10)
-        ->withQueryString();
+    public function users(UserService $userService)
+    {
+        $users = $userService->paginateSearchResults(request('search'));
 
-    return view('admin.users.index', compact('users'));
+        return view('admin.users.index', compact('users'));
     }
 
-    public function tokens(Request $request)
+    public function tokens(Request $request, TokenService $tokenService)
     {
-        $query = Token::query()->with('user');
-
-        if ($search = $request->query('search')) {
-            $query->where(function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('token', 'like', "%{$search}%");
-            });
-        }
-
-        $tokens = $query->orderBy('created_at', 'desc')
-            ->paginate(10)
-            ->withQueryString();
+        $tokens = $tokenService->paginateForAdmin($request->query('search'));
 
         return view('admin.tokens.index', compact('tokens'));
     }
@@ -76,7 +63,10 @@ class AdminAuthController extends BaseController
 
         $token = Str::random(64);
 
-        return back()->with('token', $token);
+        return back()
+            ->with('success', 'Token generated successfully.')
+            ->with('token', $token)
+            ->with('token_name', $request->input('name'));
     }
 
     public function showLoginForm()
@@ -89,48 +79,42 @@ class AdminAuthController extends BaseController
         return view('admin.register');
     }
 
-    public function register(Request $request)
+    public function register(Request $request, AdminService $adminService)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:admins,email',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        Admin::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $adminService->createAccount($validated);
 
-        return redirect()->route('admin.login')->with('success', 'Admin account created successfully.');
+        return  redirect()->route('admin.login')->with('success', 'Admin account created successfully.');
     }
 
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
+    
+public function login(Request $request, AuthService $authService)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
 
-        $credentials = $request->only('email', 'password');
+    $route = $authService->login(
+        $request->only('email', 'password'),
+        $request->boolean('remember')
+    );
 
-        if (Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
+    if ($route) {
+        $request->session()->regenerate();
 
-            return redirect()->intended(route('admin.dashboard'));
-        }
-
-        if (Auth::guard('manager')->attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
-            return redirect()->intended(route('manager.dashboard'));
-        }
-
-        return back()->withErrors([
-            'email' => 'These credentials do not match our records.',
-        ])->onlyInput('email');
+        return redirect()->intended(route($route));
     }
+
+    return back()->withErrors([
+        'email' => 'These credentials do not match our records.',
+    ])->onlyInput('email');
+}
 
     public function logout(Request $request)
     {

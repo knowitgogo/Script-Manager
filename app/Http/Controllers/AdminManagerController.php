@@ -2,27 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Manager;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\Hash;
+use App\Services\ManagerService;
 
 class AdminManagerController extends BaseController
 {
-    public function index(Request $request)
+    public function index(Request $request, ManagerService $managerService)
     {
-        $query = Manager::query();
-
-        if ($search = $request->query('search')) {
-            $query->where(function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-
-        $managers = $query->orderBy('created_at', 'desc')
-            ->paginate(10)
-            ->withQueryString();
+        $managers = $managerService->paginateSearchResults($request->query('search'));
 
         return view('admin.managers.index', compact('managers'));
     }
@@ -32,74 +20,60 @@ class AdminManagerController extends BaseController
         return view('admin.create-manager');
     }
 
-    public function store(Request $request)
+    public function store(Request $request, ManagerService $managerService)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:managers,email',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        Manager::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $managerService->createAccount($validated);
 
         return redirect()
             ->route('admin.managers.index')
             ->with('success', 'Manager created successfully.');
     }
 
-    public function edit(Manager $manager)
+    public function edit(\App\Models\Manager $manager)
     {
         return view('admin.managers.edit', compact('manager'));
     }
 
-    public function update(Request $request, Manager $manager)
+    public function update(Request $request, \App\Models\Manager $manager, ManagerService $managerService)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:managers,email,' . $manager->id,
             'password' => 'nullable|string|min:6|confirmed',
         ]);
 
-        $manager->name = $request->name;
-        $manager->email = $request->email;
-
-        if ($request->filled('password')) {
-            $manager->password = Hash::make($request->password);
-        }
-
-        $manager->save();
+        $managerService->updateProfile($manager, $validated);
 
         return redirect()
             ->route('admin.managers.index')
             ->with('success', 'Manager updated successfully.');
     }
 
-    public function destroy(Manager $manager)
+    public function destroy(\App\Models\Manager $manager, ManagerService $managerService)
     {
-        Manager::whereKey($manager->id)->delete();
+        $managerService->delete($manager);
 
         return redirect()
             ->route('admin.managers.index')
             ->with('success', 'Manager deleted successfully.');
     }
     public function deleted()
-{
-    $managers = Manager::onlyTrashed()
-        ->orderBy('deleted_at', 'desc')
-        ->paginate(10);
+    {
+        $managers = app(ManagerService::class)->deleted(10);
 
-    return view('admin.managers.deleted', compact('managers'));
-}
-public function restore($id)
-{
-    Manager::onlyTrashed()
-        ->findOrFail($id)
-        ->restore();
+        return view('admin.managers.deleted', compact('managers'));
+    }
 
-    return back()->with('success', 'Manager restored successfully.');
-}
+    public function restore($id)
+    {
+        app(ManagerService::class)->restore($id);
+
+        return back()->with('success', 'Manager restored successfully.');
+    }
 }

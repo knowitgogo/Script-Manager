@@ -4,14 +4,14 @@
     <style>
         .manager-shell {
             min-height: 100vh;
-            background: #f8fafc;
+            background: var(--color-bg);
             display: flex;
             flex-direction: column;
         }
 
         .manager-shell nav {
-            background: #1e293b;
-            color: white;
+            background: var(--color-nav-bg);
+            color: var(--color-nav-text);
             padding: 16px 32px;
             display: flex;
             flex-wrap: wrap;
@@ -28,28 +28,28 @@
         }
 
         .manager-shell nav a {
-            color: white;
+            color: var(--color-nav-text);
             text-decoration: none;
             padding: 8px 14px;
             border-radius: 6px;
         }
 
         .manager-shell nav a:hover {
-            background: #64748b;
+            background: var(--color-nav-hover);
         }
 
         .manager-shell nav .logout-button {
-            background: #2563eb;
+            background: var(--color-primary);
             border: none;
             padding: 8px 16px;
             border-radius: 6px;
-            color: white;
+            color: #ffffff;
             cursor: pointer;
             font-weight: 600;
         }
 
         .manager-shell nav .logout-button:hover {
-            background: #1d4ed8;
+            background: var(--color-primary-hover);
         }
 
         .manager-shell .container {
@@ -59,15 +59,13 @@
             flex: 1;
         }
 
-
-
         .footer {
             margin-top: 40px;
-            background: #1e293b;
+            background: var(--color-nav-bg);
             color: #ffffff;
             padding: 16px 0;
             text-align: center;
-            border-top: 1px solid #334155;
+            border-top: 1px solid var(--color-border);
         }
 
         .footer .container {
@@ -89,16 +87,22 @@
         @auth('manager')
             <nav>
                 <div class="nav-links">
-                    <a href="{{ route('manager.dashboard') }}">Dashboard</a>
-                    <a href="{{ route('manager.users.index') }}">Users</a>
+                    <a href="{{ route('manager.dashboard') }}">{{ __('messages.dashboard') }}</a>
+                    <a href="{{ route('manager.users.index') }}">{{ __('messages.users') }}</a>
                 </div>
 
-                <div class="nav-links" style="gap: 12px;">
+                <div class="nav-links" style="gap: 12px; align-items: center;">
+                    <form method="GET" action="{{ route('locale.switch') }}" style="display:inline; margin:0;">
+                        <select name="lang" onchange="this.form.submit()" style="padding:6px 8px; border-radius:6px;">
+                            <option value="nl" {{ app()->getLocale() == 'nl' ? 'selected' : '' }}>NL</option>
+                            <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>EN</option>
+                        </select>
+                    </form>
                     <span style="font-weight: 600;">{{ auth('manager')->user()->name ?? 'Manager' }}</span>
                     <span style="opacity: 0.8;">{{ auth('manager')->user()->email ?? '' }}</span>
                     <form method="POST" action="{{ route('manager.logout') }}" style="display:inline; margin:0;">
                         @csrf
-                        <button type="submit" class="logout-button">Logout</button>
+                        <button type="submit" class="logout-button">{{ __('messages.logout') }}</button>
                     </form>
                 </div>
             </nav>
@@ -109,7 +113,7 @@
 
         <footer class="footer">
             <div class="container">
-                <p>© {{ date('Y') }} Admin Panel. All rights reserved.</p>
+                <p>{{ __('messages.admin_panel_copyright', ['year' => date('Y')]) }}</p>
             </div>
         </footer>
     </div>

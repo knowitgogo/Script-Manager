@@ -1,116 +1,62 @@
 @extends('layouts.app')
 
-@section('title', 'Manager Login')
+@section('title', __('messages.manager_login') ?? 'Manager Login')
 
 @section('styles')
     <style>
         body {
-            font-family: ui-sans-serif, system-ui, sans-serif;
-            background: #f8fafc;
-            color: #111827;
             padding: 32px;
         }
 
         .container {
             max-width: 420px;
             margin: 0 auto;
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 28px;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, .08);
-        }
-
-        .field {
-            margin-bottom: 18px;
-        }
-
-        .label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .input {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-        }
-
-        .button {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 12px 18px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .button:hover {
-            background: #1d4ed8;
-        }
-
-        .message {
-            margin-bottom: 16px;
-            padding: 12px 14px;
-            border-radius: 8px;
-        }
-
-        .errors {
-            background: #fef2f2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-
-        .errors li {
-            margin-bottom: 6px;
         }
     </style>
 @endsection
 
 @section('content')
     <div class="container">
-        <h1>Manager Login</h1>
+        <div class="card">
+            <h1>{{ __('messages.manager_login') ?? 'Manager Login' }}</h1>
 
-        @if ($errors->any())
-            <div class="message errors">
-                <strong>Whoops!</strong>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+            @if (session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
 
-        <form method="POST" action="{{ route('manager.login.post') }}">
-            @csrf
+            <form method="POST" action="{{ route('manager.login.post') }}">
+                @csrf
 
-            <div class="field">
-                <label class="label" for="email">Email</label>
-                <input class="input" id="email" name="email" type="email" value="{{ old('email') }}" required
-                    autofocus />
-            </div>
+                <div class="field">
+                    <label class="label" for="email">Email</label>
+                    <input class="input @error('email') is-invalid @enderror" id="email" name="email" type="email"
+                        value="{{ old('email') }}" required autofocus />
+                    @error('email')
+                        <span class="field-error">{{ $message }}</span>
+                    @enderror
+                </div>
 
-            <div class="field">
-                <label class="label" for="password">Password</label>
-                <input class="input" id="password" name="password" type="password" required
-                    autocomplete="current-password" />
-            </div>
+                <div class="field">
+                    <label class="label" for="password">Password</label>
+                    <input class="input @error('password') is-invalid @enderror" id="password" name="password" type="password" required
+                        autocomplete="current-password" />
+                    @error('password')
+                        <span class="field-error">{{ $message }}</span>
+                    @enderror
+                </div>
 
-            <div class="field">
-                <label>
-                    <input type="checkbox" name="remember" /> Remember me
-                </label>
-            </div>
+                <div class="field">
+                    <label>
+                        <input type="checkbox" name="remember" /> {{ __('messages.remember_me') ?? 'Remember me' }}
+                    </label>
+                </div>
 
-            <button class="button" type="submit">Login</button>
-        </form>
+                <button class="button" type="submit">{{ __('messages.login') ?? 'Login' }}</button>
+            </form>
 
-        <p style="margin-top:18px;">
-            Manager accounts are created by admins. If you need access, please ask your administrator.
-        </p>
+            <p style="margin-top:18px; color: var(--color-text-muted);">
+                Manager accounts are created by admins. If you need access, please ask your administrator.
+            </p>
+        </div>
     </div>
 @endsection

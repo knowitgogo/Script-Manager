@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Deleted Users')
+@section('title', __('messages.deleted_users'))
 
 @section('admin_content')
     <div class="container">
@@ -8,27 +8,27 @@
 
             <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                    <h1>Deleted Users</h1>
-                    <p>All soft deleted users.</p>
+                    <h1>{{ __('messages.deleted_users') }}</h1>
+                    <p>{{ __('messages.deleted_users') }}.</p>
                 </div>
 
                 <a href="{{ route('admin.users.index') }}" class="button">
-                    Active Users
+                    {{ __('messages.active_users') }}
                 </a>
             </div>
 
             @if ($users->isEmpty())
                 <div class="empty">
-                    No deleted users found.
+                    {{ __('messages.no_deleted_users') }}
                 </div>
             @else
                 <table>
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Deleted At</th>
-                            <th>Actions</th>
+                            <th>{{ __('messages.label_name') }}</th>
+                            <th>{{ __('messages.label_email') }}</th>
+                            <th>{{ __('messages.deleted_at') ?? 'Deleted At' }}</th>
+                            <th>{{ __('messages.label_actions') }}</th>
                         </tr>
                     </thead>
 
@@ -45,7 +45,7 @@
                                         <form method="POST" action="{{ route('admin.users.restore', $user->id) }}">
                                             @csrf
                                             <button type="submit" class="button success">
-                                                Restore
+                                                {{ __('messages.restore') }}
                                             </button>
                                         </form>
 
@@ -54,8 +54,8 @@
                                             @method('DELETE')
 
                                             <button type="submit" class="button danger"
-                                                onclick="return confirm('Permanently delete this user?')">
-                                                Delete Permanently
+                                                onclick="return confirm('{{ __('messages.confirm_delete') }}')">
+                                                {{ __('messages.delete_permanently') }}
                                             </button>
                                         </form>
 

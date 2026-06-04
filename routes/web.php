@@ -11,16 +11,33 @@ use App\Http\Controllers\UserTokenController;
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\ManagerMiddleware;
+use Illuminate\Http\Request;
+use App\Http\Middleware\SetLocale;
 
-Route::get('/test-admin', function () {
-    $admin = Admin::create([
-        'name' => 'Test Admin',
-        'email' => 'test@example.com',
-        'password' => bcrypt('123456'),
+Route::get('/locale', function (Request $request) {
+    $lang = $request->query('lang', config('app.locale'));
+
+    if (! in_array($lang, ['en', 'nl'])) {
+        $lang = config('app.locale');
+    }
+
+    session(['locale' => $lang]);
+
+    return back();
+})->name('locale.switch');
+
+Route::post('/theme', [\App\Http\Controllers\ThemeController::class, 'update'])
+    ->name('theme.update');
+
+Route::get('/debug-translation', function () {
+    return response()->json([
+        'locale' => app()->getLocale(),
+        'session_locale' => session('locale'),
+        'status' => __('messages.status'),
     ]);
-
-    return $admin;
 });
+// end SetLocale wrapper
+
 
 Route::get('/register', [UserAuthController::class, 'showRegistrationForm'])
     ->name('register');

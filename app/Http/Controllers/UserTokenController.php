@@ -3,37 +3,39 @@
 namespace App\Http\Controllers;
 
 use App\Models\Token;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use App\Services\TokenService;
 
 class UserTokenController extends BaseController
 {
-    public function index()
+    public function index(TokenService $tokenService)
     {
-        $tokens = Auth::user()->tokens()->latest()->paginate(10);
+        $tokens = $tokenService->paginateForUser(Auth::user());
 
         return view('user.tokens.index', compact('tokens'));
     }
 
-    public function create()
+    public function create(TokenService $tokenService)
     {
-        $tokens = Auth::user()->tokens()->latest()->paginate(10);
+        $tokens = $tokenService->paginateForUser(Auth::user());
 
         return view('user.tokens.index', compact('tokens'))->with('showGenerate', true);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, TokenService $tokenService)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
         ]);
 
         $tokenValue = Str::random(64);
 
-        Auth::user()->tokens()->create([
-            'name' => $request->name,
+        $tokenService->createForUser(Auth::user(), [
+            'name' => $validated['name'],
             'token' => $tokenValue,
         ]);
 
@@ -50,38 +52,36 @@ class UserTokenController extends BaseController
         return view('user.tokens.edit', compact('token'));
     }
 
-    public function update(Request $request, Token $token)
+    public function update(Request $request, Token $token, TokenService $tokenService)
     {
         $this->authorizeToken($token);
 
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
         ]);
 
-        $token->name = $request->name;
-        $token->save();
+        $tokenService->updateName($token, $validated['name']);
 
         return redirect()
             ->route('tokens.index')
             ->with('success', 'Token updated successfully.');
     }
 
-    public function destroy(Token $token)
+    public function destroy(Token $token, TokenService $tokenService)
     {
         $this->authorizeToken($token);
-        Token::query()->where('id', '=', $token->id)->delete();
+        $tokenService->delete($token);
 
         return redirect()
             ->route('tokens.index')
             ->with('success', 'Token deleted successfully.');
     }
 
-    public function disable(Token $token)
+    public function disable(Token $token, TokenService $tokenService)
     {
         $this->authorizeToken($token);
 
-        $token->disabled = !$token->disabled;
-        $token->save();
+        $tokenService->toggleDisabled($token);
 
         $message = $token->disabled ? 'Token disabled.' : 'Token enabled.';
 

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Token;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -21,9 +23,80 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
     use SoftDeletes;
 
+    public static function createAccount(array $data): self
+    {
+        return static::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => $data['password'],
+        ]);
+    }
+
+    public function updateProfile(array $data): void
+    {
+        $this->name = $data['name'];
+        $this->email = $data['email'];
+
+        if (! empty($data['password'])) {
+            $this->password = $data['password'];
+        }
+
+        $this->save();
+    }
+
+    public function toggleDisabled(): void
+    {
+        $this->disabled = ! $this->disabled;
+        $this->save();
+    }
+
+    public function setDisabled(bool $disabled): void
+    {
+        $this->disabled = $disabled;
+        $this->save();
+    }
+
     public function tokens(): HasMany
     {
         return $this->hasMany(Token::class);
+    }
+
+    public function tokensForListing(int $perPage = 10): LengthAwarePaginator
+    {
+        return $this->tokens()->recent()->paginate($perPage);
+    }
+
+    public static function paginateSearchResults(?string $search, int $perPage = 10): LengthAwarePaginator
+    {
+        return static::query()
+            ->search($search)
+            ->latest()
+            ->paginate($perPage);
+    }
+
+    public static function totalCount(): int
+    {
+        return static::query()->count('*');
+    }
+
+    public static function disabledCount(): int
+    {
+        return static::query()->where('disabled', true)->count();
+    }
+
+    public static function deletedRecords(): Collection
+    {
+        return static::onlyTrashed()->get();
+    }
+
+    public static function deleteRecord(self $user): void
+    {
+        static::query()->whereKey($user->getKey())->delete();
+    }
+
+    public static function restoreTrashed(int $id): void
+    {
+        static::onlyTrashed()->findOrFail($id)->restore();
     }
 
     /**

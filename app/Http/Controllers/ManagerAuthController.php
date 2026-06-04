@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
+use App\Services\UserService;
 
 class ManagerAuthController extends BaseController
 {
@@ -44,44 +45,31 @@ class ManagerAuthController extends BaseController
         return redirect()->route('manager.login');
     }
 
-    public function dashboard()
+    public function dashboard(UserService $userService)
     {
-        $totalUsers = User::query()->count('*');
-        $disabledUsers = User::query()->where('disabled', true)->count('*');
+        $totalUsers = $userService->totalCount();
+        $disabledUsers = $userService->disabledCount();
 
         return view('manager.dashboard', compact('totalUsers', 'disabledUsers'));
     }
 
-    public function users(Request $request)
+    public function users(Request $request, UserService $userService)
     {
-        $query = User::query();
-
-        if ($search = $request->query('search')) {
-            $query->where(function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-
-        $users = $query->orderBy('created_at', 'desc')
-            ->paginate(10)
-            ->withQueryString();
+        $users = $userService->paginateSearchResults($request->query('search'));
 
         return view('manager.users.index', compact('users'));
     }
 
-    public function disable(User $user)
+    public function disable(User $user, UserService $userService)
     {
-        $user->disabled = true;
-        $user->save();
+        $userService->setDisabled($user, true);
 
         return back()->with('success', 'User disabled successfully.');
     }
 
-    public function enable(User $user)
+    public function enable(User $user, UserService $userService)
     {
-        $user->disabled = false;
-        $user->save();
+        $userService->setDisabled($user, false);
 
         return back()->with('success', 'User enabled successfully.');
     }
