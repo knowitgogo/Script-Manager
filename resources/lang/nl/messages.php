@@ -29,6 +29,8 @@ return [
     'admin_panel_copyright' => '© :year Admin Paneel. Alle rechten voorbehouden.',
     'disabled' => 'Uitgeschakeld',
     'active' => 'Actief',
+    'success' => 'Succes',
+    'failed' => 'Fout',
     'no_records' => 'Geen resultaten gevonden.',
     'edit' => 'Bewerken',
     'delete' => 'Verwijderen',
@@ -45,6 +47,7 @@ return [
     'view_requests' => 'Toon Verzoeken',
     'view_tokens' => 'Toon Tokens',
     'create_new_token' => 'Nieuw Token Aanmaken',
+    'jquery_token_generation' => 'jQuery Token Generatie',
     'delete_permanently' => 'Permanent Verwijderen',
     'no_deleted_users' => 'Geen verwijderde gebruikers gevonden.',
     'no_deleted_managers' => 'Geen verwijderde beheerders gevonden.',
@@ -67,6 +70,7 @@ return [
     'user' => 'Gebruiker',
     'manager' => 'Beheerder',
     'new_token_created' => 'Nieuw token aangemaakt:',
+    'token_generated_for' => 'Token is gegenereerd voor :name.',
     'no_tokens_found' => 'Nog geen tokens gevonden. Maak een token aan om te beginnen.',
     'copy' => 'Kopieer',
     'token_copied' => 'Token gekopieerd naar klembord!',
@@ -134,3 +138,4 @@ return [
 'user_requests_title' => 'Verzoeken',
 'user_requests_empty' => 'Er zijn momenteel geen verzoeken om weer te geven.',
 ];
+?>

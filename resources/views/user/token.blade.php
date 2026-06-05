@@ -17,6 +17,45 @@
             word-break: break-all;
             font-family: monospace;
         }
+
+        .token-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .token-modal-backdrop.is-open {
+            display: flex;
+        }
+
+        .token-modal {
+            background: var(--color-surface, #fff);
+            color: var(--color-text, #111);
+            border-radius: 10px;
+            max-width: 420px;
+            width: 90%;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        .token-modal h2 {
+            margin: 0 0 12px;
+            font-size: 1.2rem;
+        }
+
+        .token-modal p {
+            margin: 0 0 20px;
+            color: var(--color-text-muted, #555);
+        }
+
+        .token-modal .button {
+            min-width: 100px;
+        }
     </style>
 @endsection
 
@@ -25,10 +64,6 @@
     <div class="container">
         <div class="card">
             <h1>{{ __('messages.generate_token') }}</h1>
-
-            @if (session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
 
             <form method="POST" action="{{ route('token.generate.post') }}">
                 @csrf
@@ -55,4 +90,43 @@
         </div>
     </div>
 
+    @if (session('token_name'))
+        <div class="token-modal-backdrop is-open" id="tokenModal" role="dialog" aria-modal="true">
+            <div class="token-modal">
+                <h2>{{ __('messages.generate_token') }}</h2>
+                <p>{{ __('messages.token_generated_for', ['name' => session('token_name')]) }}</p>
+                <button type="button" class="button" id="closeTokenModal">
+                    {{ __('messages.cancel') }}
+                </button>
+            </div>
+        </div>
+    @endif
+
+@endsection
+
+@section('scripts')
+    <script>
+        (function () {
+            const modal = document.getElementById('tokenModal');
+            if (!modal) {
+                return;
+            }
+
+            const closeBtn = document.getElementById('closeTokenModal');
+
+            const close = () => modal.classList.remove('is-open');
+
+            closeBtn.addEventListener('click', close);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    close();
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    close();
+                }
+            });
+        })();
+    </script>
 @endsection

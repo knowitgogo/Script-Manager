@@ -77,7 +77,10 @@
             color: var(--color-text);
         }
 
-        h1, h2, h3, h4 {
+        h1,
+        h2,
+        h3,
+        h4 {
             color: var(--color-text);
         }
 
@@ -149,7 +152,8 @@
             margin-top: 20px;
         }
 
-        th, td {
+        th,
+        td {
             padding: 14px 12px;
             border-bottom: 1px solid var(--color-border);
             text-align: left;
@@ -416,7 +420,7 @@
     </style>
 
     <script>
-        (function () {
+        (function() {
             var stored = @json($theme);
             var resolved;
 
@@ -431,7 +435,7 @@
     </script>
 
     <script>
-        (function () {
+        (function() {
             function disableBrowserValidation(form) {
                 form.setAttribute('novalidate', 'novalidate');
                 form.noValidate = true;
@@ -439,9 +443,9 @@
 
             document.querySelectorAll('form').forEach(disableBrowserValidation);
 
-            var observer = new MutationObserver(function (mutations) {
-                mutations.forEach(function (mutation) {
-                    mutation.addedNodes.forEach(function (node) {
+            var observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
                         if (node.nodeName === 'FORM') {
                             disableBrowserValidation(node);
                         } else if (node.querySelectorAll) {
@@ -451,7 +455,10 @@
                 });
             });
 
-            observer.observe(document.documentElement, { childList: true, subtree: true });
+            observer.observe(document.documentElement, {
+                childList: true,
+                subtree: true
+            });
         })();
     </script>
 
@@ -469,10 +476,13 @@
         <input type="hidden" name="theme" id="theme-input" value="{{ $theme }}">
     </form>
 
-    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="{{ __('messages.theme_toggle') }}" title="{{ __('messages.theme_toggle') }}">
+    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="{{ __('messages.theme_toggle') }}"
+        title="{{ __('messages.theme_toggle') }}">
         <svg id="theme-icon-sun" viewBox="0 0 24 24" style="display:none;">
             <circle cx="12" cy="12" r="4"></circle>
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+            <path
+                d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41">
+            </path>
         </svg>
         <svg id="theme-icon-moon" viewBox="0 0 24 24" style="display:none;">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -480,7 +490,7 @@
     </button>
 
     <script>
-        (function () {
+        (function() {
             var stored = @json($theme);
             var html = document.documentElement;
 
@@ -497,7 +507,7 @@
 
             updateIcon();
 
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
                 if (stored !== 'light' && stored !== 'dark') {
                     var newTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
                     html.setAttribute('data-theme', newTheme);
@@ -505,7 +515,7 @@
                 }
             });
 
-            document.getElementById('theme-toggle').addEventListener('click', function () {
+            document.getElementById('theme-toggle').addEventListener('click', function() {
                 var current = resolvedTheme();
                 var next = current === 'dark' ? 'light' : 'dark';
                 document.getElementById('theme-input').value = next;
@@ -513,6 +523,7 @@
             });
         })();
     </script>
+    @yield('scripts')
 </body>
 
 </html>

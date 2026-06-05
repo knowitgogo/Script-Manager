@@ -57,16 +57,16 @@ class AdminAuthController extends BaseController
 
     public function generateToken(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
         ]);
 
         $token = Str::random(64);
 
         return back()
-            ->with('success', 'Token generated successfully.')
+            ->with('success', __('messages.token_generated_for', ['name' => $validated['name']]))
             ->with('token', $token)
-            ->with('token_name', $request->input('name'));
+            ->with('token_name', $validated['name']);
     }
 
     public function showLoginForm()

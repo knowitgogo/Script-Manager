@@ -34,6 +34,16 @@
             border-radius: 6px;
         }
 
+        .user-shell nav a.nav-button {
+            background: var(--color-primary);
+            color: var(--color-text-on-primary);
+            font-weight: 600;
+        }
+
+        .user-shell nav a.nav-button:hover {
+            background: var(--color-primary-hover);
+        }
+
         .user-shell nav a:hover {
             background: var(--color-nav-hover);
         }
@@ -90,7 +100,7 @@
                     <a href="{{ route('status') }}">{{ __('messages.status') }}</a>
                     <a href="{{ route('requests') }}">{{ __('messages.requests') }}</a>
                     <a href="{{ route('tokens.index') }}">{{ __('messages.my_tokens') }}</a>
-                    <a href="{{ route('token.generate') }}">{{ __('messages.generate_token') }}</a>
+                    <a href="{{ route('token.generate') }}" class="nav-button">{{ __('messages.generate_token') }}</a>
                 </div>
 
                 <div class="nav-links" style="gap: 12px; align-items: center;">

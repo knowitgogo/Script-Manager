@@ -15,6 +15,13 @@ class TokenService
             ->paginate($perPage);
     }
 
+    public function getForUser(User $user)
+    {
+        return $user->tokens()
+            ->latest('created_at')
+            ->get();
+    }
+
     public function paginateForAdmin(?string $search, int $perPage = 10): LengthAwarePaginator
     {
         return Token::query()

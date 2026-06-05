@@ -12,9 +12,15 @@ use App\Services\TokenService;
 
 class UserTokenController extends BaseController
 {
-    public function index(TokenService $tokenService)
+    public function index(Request $request, TokenService $tokenService)
     {
         $tokens = $tokenService->paginateForUser(Auth::user());
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('user.tokens.partials.table_and_pagination', compact('tokens'))->render(),
+            ]);
+        }
 
         return view('user.tokens.index', compact('tokens'));
     }
@@ -24,6 +30,11 @@ class UserTokenController extends BaseController
         $tokens = $tokenService->paginateForUser(Auth::user());
 
         return view('user.tokens.index', compact('tokens'))->with('showGenerate', true);
+    }
+
+    public function jqueryGenerate()
+    {
+        return view('user.jquery-token');
     }
 
     public function store(Request $request, TokenService $tokenService)
@@ -39,10 +50,21 @@ class UserTokenController extends BaseController
             'token' => $tokenValue,
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => __('messages.token_generated_for', ['name' => $validated['name']]),
+                'data' => [
+                    'name' => $validated['name'],
+                    'token' => $tokenValue,
+                ],
+            ], 201);
+        }
+
         return redirect()
             ->route('tokens.index')
-            ->with('success', 'Token created successfully.')
-            ->with('token', $tokenValue);
+            ->with('success', __('messages.token_generated_for', ['name' => $validated['name']]))
+            ->with('token', $tokenValue)
+            ->with('token_name', $validated['name']);
     }
 
     public function edit(Token $token)

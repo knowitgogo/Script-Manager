@@ -84,6 +84,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/tokens/{token}/disable', [UserTokenController::class, 'disable'])
         ->name('tokens.disable');
+
+    Route::get('/jquery-token-generation', [UserTokenController::class, 'jqueryGenerate'])
+        ->name('tokens.jquery');
     
 });
 
