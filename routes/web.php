@@ -17,7 +17,7 @@ use App\Http\Middleware\SetLocale;
 Route::get('/locale', function (Request $request) {
     $lang = $request->query('lang', config('app.locale'));
 
-    if (! in_array($lang, ['en', 'nl'])) {
+    if (!in_array($lang, ['en', 'nl'])) {
         $lang = config('app.locale');
     }
 
@@ -54,6 +54,10 @@ Route::post('/login', [UserAuthController::class, 'login'])
 Route::post('/logout', [UserAuthController::class, 'logout'])
     ->name('logout');
 
+Route::post('/user/chatBot/message', [App\Http\Controllers\ChatBotController::class, 'sendUserMessage'])
+    ->name('user.chatBot');
+Route::post('/user/chatbot/message', [App\Http\Controllers\ChatBotController::class, 'sendUserMessage']);
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [UserAuthController::class, 'dashboard'])
         ->name('dashboard');
@@ -87,7 +91,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/jquery-token-generation', [UserTokenController::class, 'jqueryGenerate'])
         ->name('tokens.jquery');
-    
+
 });
 
 Route::get('/admin/register', [AdminAuthController::class, 'showRegistrationForm'])
@@ -129,7 +133,7 @@ Route::middleware(ManagerMiddleware::class)->group(function () {
 
     Route::get('/manager/users/disabled', [ManagerAuthController::class, 'disabledUsers'])
         ->name('manager.users.disabled');
-        });
+});
 
 Route::middleware(AdminMiddleware::class)->group(function () {
     Route::get('/admin/dashboard', [AdminAuthController::class, 'dashboard'])
@@ -155,9 +159,9 @@ Route::middleware(AdminMiddleware::class)->group(function () {
 
     Route::get('/admin/users/create', [AdminUserController::class, 'create'])
         ->name('admin.users.create');
-// deleted users List
+    // deleted users List
     Route::get('/admin/users/deleted', [AdminUserController::class, 'deleted'])
-    ->name('admin.users.deleted');
+        ->name('admin.users.deleted');
 
     Route::post('/admin/users', [AdminUserController::class, 'store'])
         ->name('admin.users.store');
@@ -170,11 +174,11 @@ Route::middleware(AdminMiddleware::class)->group(function () {
 
     Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy'])
         ->name('admin.users.destroy');
-Route::post('/admin/users/{id}/restore', [AdminUserController::class, 'restore'])
-    ->name('admin.users.restore');
+    Route::post('/admin/users/{id}/restore', [AdminUserController::class, 'restore'])
+        ->name('admin.users.restore');
 
-Route::delete('/admin/users/{id}/force-delete', [AdminUserController::class, 'forceDelete'])
-    ->name('admin.users.force-delete');
+    Route::delete('/admin/users/{id}/force-delete', [AdminUserController::class, 'forceDelete'])
+        ->name('admin.users.force-delete');
     Route::post('/admin/users/{user}/status', [AdminUserController::class, 'toggleStatus'])
         ->name('admin.users.toggle-status');
 
@@ -195,9 +199,13 @@ Route::delete('/admin/users/{id}/force-delete', [AdminUserController::class, 'fo
 
     Route::post('/admin/managers', [AdminManagerController::class, 'store'])
         ->name('admin.managers.store');
-        Route::get('/admin/managers/deleted', [AdminManagerController::class, 'deleted'])
-    ->name('admin.managers.deleted');
+    Route::get('/admin/managers/deleted', [AdminManagerController::class, 'deleted'])
+        ->name('admin.managers.deleted');
     Route::post('/admin/managers/{id}/restore', [AdminManagerController::class, 'restore'])
-    ->name('admin.managers.restore');
-    
+        ->name('admin.managers.restore');
+
+    // ChatBot Route
+
+
+
 });
