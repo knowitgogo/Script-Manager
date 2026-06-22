@@ -16,6 +16,10 @@
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
 
+            @if (session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
+
             <form method="GET" action="{{ route('admin.tokens.index') }}" style="margin-top:18px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                 <input type="text" name="search" placeholder="{{ __('messages.search_token_placeholder') }}" value="{{ request('search') }}" />
                 <button type="submit" class="button secondary">{{ __('messages.search') }}</button>
@@ -59,8 +63,37 @@
                     </tbody>
                 </table>
 
-                <div style="margin-top:24px; display:flex; justify-content:flex-end;">
-                    {{ $tokens->withQueryString()->links() }}
+                <div class="pagination-simple">
+                    @if ($tokens->onFirstPage())
+                        <span class="disabled">{{ __('messages.previous') }}</span>
+                    @else
+                        <a href="{{ $tokens->previousPageUrl() }}">{{ __('messages.previous') }}</a>
+                    @endif
+
+                    @if ($tokens->hasMorePages())
+                        <a href="{{ $tokens->nextPageUrl() }}">{{ __('messages.next') }}</a>
+                    @else
+                        <span class="disabled">{{ __('messages.next') }}</span>
+                    @endif
+                </div>
+                <div class="page-jump">
+                    <span>
+                        {{ __('messages.page') }} {{ $tokens->currentPage() }} {{ __('messages.of') }} {{ $tokens->lastPage() }}
+                    </span>
+
+                    <form method="GET" action="{{ route('admin.tokens.index') }}">
+                        @foreach (request()->except('page') as $key => $value)
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endforeach
+                        <input type="number" name="page" min="1" max="{{ $tokens->lastPage() }}"
+                            value="{{ $tokens->currentPage() }}">
+                        <button type="submit" class="button secondary">{{ __('messages.go') }}</button>
+                    </form>
+                </div>
+                <div style="margin-top:15px; font-size:14px; color:var(--color-text-subtle);">
+                    {{ __('messages.total_records') }}: {{ $tokens->total() }} |
+                    {{ __('messages.current_page') }}: {{ $tokens->currentPage() }} |
+                    {{ __('messages.total_pages') }}: {{ $tokens->lastPage() }}
                 </div>
             @endif
         </div>

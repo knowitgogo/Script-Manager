@@ -41,5 +41,6 @@
                 @endif
             </div>
         </div>
+        <script src="http://localhost:4173/chatbot.iife.js" data-api-url="http://localhost:5000/chat"></script>
 
-    @endsection
+@endsection

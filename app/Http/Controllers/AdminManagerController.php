@@ -12,6 +12,13 @@ class AdminManagerController extends BaseController
     {
         $managers = $managerService->paginateSearchResults($request->query('search'));
 
+        if ($managers->lastPage() > 0 && $managers->currentPage() > $managers->lastPage()) {
+            return redirect()->route('admin.managers.index', array_merge(
+                $request->query(),
+                ['page' => $managers->lastPage()]
+            ))->with('error', __('messages.requested_page_not_found'));
+        }
+
         return view('admin.managers.index', compact('managers'));
     }
 
@@ -66,6 +73,13 @@ class AdminManagerController extends BaseController
     public function deleted()
     {
         $managers = app(ManagerService::class)->deleted(10);
+
+        if ($managers->lastPage() > 0 && $managers->currentPage() > $managers->lastPage()) {
+            return redirect()->route('admin.managers.deleted', array_merge(
+                request()->query(),
+                ['page' => $managers->lastPage()]
+            ))->with('error', __('messages.requested_page_not_found'));
+        }
 
         return view('admin.managers.deleted', compact('managers'));
     }

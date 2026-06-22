@@ -57,6 +57,13 @@ class ManagerAuthController extends BaseController
     {
         $users = $userService->paginateSearchResults($request->query('search'));
 
+        if ($users->lastPage() > 0 && $users->currentPage() > $users->lastPage()) {
+            return redirect()->route('manager.users.index', array_merge(
+                $request->query(),
+                ['page' => $users->lastPage()]
+            ))->with('error', __('messages.requested_page_not_found'));
+        }
+
         return view('manager.users.index', compact('users'));
     }
 

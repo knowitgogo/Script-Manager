@@ -127,10 +127,23 @@
                 </div>
             @endif
 
+            @if (session('error'))
+                <div class="alert alert-danger" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <span>{{ session('error') }}</span>
+                    <button type="button" onclick="this.parentElement.style.display='none'" style="background:transparent; border:none; color:inherit; font-size:20px; cursor:pointer; font-weight:bold; line-height:1;">&times;</button>
+                </div>
+            @endif
+
             <!-- Dynamic Success Alert -->
             <div id="jquery-success-alert" class="alert alert-success" style="display:none; align-items:center; justify-content:space-between; gap:12px;">
                 <span id="jquery-success-alert-text"></span>
                 <button type="button" onclick="closeJquerySuccessAlert()" style="background:transparent; border:none; color:inherit; font-size:20px; cursor:pointer; font-weight:bold; line-height:1;">&times;</button>
+            </div>
+
+            <!-- Dynamic Error Alert -->
+            <div id="jquery-error-alert" class="alert alert-danger" style="display:none; align-items:center; justify-content:space-between; gap:12px;">
+                <span id="jquery-error-alert-text"></span>
+                <button type="button" onclick="document.getElementById('jquery-error-alert').style.display='none'" style="background:transparent; border:none; color:inherit; font-size:20px; cursor:pointer; font-weight:bold; line-height:1;">&times;</button>
             </div>
 
             @if (session('token_name'))
@@ -359,6 +372,20 @@
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 success: function(response) {
+                    if (response && response.redirect) {
+                        if (response.message) {
+                            const errAlert = document.getElementById('jquery-error-alert');
+                            const errText = document.getElementById('jquery-error-alert-text');
+                            if (errAlert && errText) {
+                                errText.textContent = response.message;
+                                errAlert.style.display = 'flex';
+                            } else {
+                                alert(response.message);
+                            }
+                        }
+                        fetchPage(response.redirect, push);
+                        return;
+                    }
                     if (response && response.html) {
                         $('#tokens-table-container').html(response.html);
                         if (push) {

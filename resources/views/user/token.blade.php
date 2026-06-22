@@ -71,8 +71,7 @@
                 <div class="field">
                     <label class="label" for="name">{{ __('messages.create_new_token') }}</label>
                     <input class="input @error('name') is-invalid @enderror" id="name" name="name" type="text"
-                        value="{{ old('name') }}"
-                        placeholder="{{ __('messages.token_name_placeholder') }}" required />
+                        value="{{ old('name') }}" placeholder="{{ __('messages.token_name_placeholder') }}" required />
                     @error('name')
                         <span class="field-error">{{ $message }}</span>
                     @enderror
@@ -105,6 +104,7 @@
 @endsection
 
 @section('scripts')
+    <script src="http://localhost:4173/chatbot.iife.js" data-api-url="http://localhost:5000/chat"></script>
     <script>
         (function () {
             const modal = document.getElementById('tokenModal');

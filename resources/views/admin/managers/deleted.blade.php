@@ -17,6 +17,14 @@
                 </a>
             </div>
 
+            @if (session('success'))
+                <div class="alert alert-success" style="margin-top: 18px;">{{ session('success') }}</div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger" style="margin-top: 18px;">{{ session('error') }}</div>
+            @endif
+
             @if ($managers->isEmpty())
                 <div class="empty">
                     {{ __('messages.no_deleted_managers') }}

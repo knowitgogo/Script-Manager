@@ -420,7 +420,7 @@
     </style>
 
     <script>
-        (function() {
+        (function () {
             var stored = @json($theme);
             var resolved;
 
@@ -435,7 +435,7 @@
     </script>
 
     <script>
-        (function() {
+        (function () {
             function disableBrowserValidation(form) {
                 form.setAttribute('novalidate', 'novalidate');
                 form.noValidate = true;
@@ -443,9 +443,9 @@
 
             document.querySelectorAll('form').forEach(disableBrowserValidation);
 
-            var observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    mutation.addedNodes.forEach(function(node) {
+            var observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (mutation) {
+                    mutation.addedNodes.forEach(function (node) {
                         if (node.nodeName === 'FORM') {
                             disableBrowserValidation(node);
                         } else if (node.querySelectorAll) {
@@ -458,6 +458,25 @@
             observer.observe(document.documentElement, {
                 childList: true,
                 subtree: true
+            });
+
+            // Prevent typing or incrementing beyond pagination bounds
+            document.addEventListener('input', function (e) {
+                if (e.target && e.target.matches('.page-jump input[type="number"]')) {
+                    var input = e.target;
+                    var max = parseInt(input.getAttribute('max'), 10);
+                    var min = parseInt(input.getAttribute('min'), 10) || 1;
+                    var val = parseInt(input.value, 10);
+
+                    if (!isNaN(val)) {
+                        if (!isNaN(max) && val > max) {
+                            input.value = max;
+                        }
+                        if (!isNaN(min) && val < min) {
+                            input.value = min;
+                        }
+                    }
+                }
             });
         })();
     </script>
@@ -490,7 +509,7 @@
     </button>
 
     <script>
-        (function() {
+        (function () {
             var stored = @json($theme);
             var html = document.documentElement;
 
@@ -507,7 +526,7 @@
 
             updateIcon();
 
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
                 if (stored !== 'light' && stored !== 'dark') {
                     var newTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
                     html.setAttribute('data-theme', newTheme);
@@ -515,7 +534,7 @@
                 }
             });
 
-            document.getElementById('theme-toggle').addEventListener('click', function() {
+            document.getElementById('theme-toggle').addEventListener('click', function () {
                 var current = resolvedTheme();
                 var next = current === 'dark' ? 'light' : 'dark';
                 document.getElementById('theme-input').value = next;

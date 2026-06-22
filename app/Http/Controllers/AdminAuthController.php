@@ -40,12 +40,26 @@ class AdminAuthController extends BaseController
     {
         $users = $userService->paginateSearchResults(request('search'));
 
+        if ($users->lastPage() > 0 && $users->currentPage() > $users->lastPage()) {
+            return redirect()->route('admin.users.index', array_merge(
+                request()->query(),
+                ['page' => $users->lastPage()]
+            ))->with('error', __('messages.requested_page_not_found'));
+        }
+
         return view('admin.users.index', compact('users'));
     }
 
     public function tokens(Request $request, TokenService $tokenService)
     {
         $tokens = $tokenService->paginateForAdmin($request->query('search'));
+
+        if ($tokens->lastPage() > 0 && $tokens->currentPage() > $tokens->lastPage()) {
+            return redirect()->route('admin.tokens.index', array_merge(
+                $request->query(),
+                ['page' => $tokens->lastPage()]
+            ))->with('error', __('messages.requested_page_not_found'));
+        }
 
         return view('admin.tokens.index', compact('tokens'));
     }

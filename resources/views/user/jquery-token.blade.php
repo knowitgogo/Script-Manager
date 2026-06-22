@@ -88,9 +88,9 @@
         integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
 
-            $('#jqueryTokenForm').on('submit', function(e) {
+            $('#jqueryTokenForm').on('submit', function (e) {
                 e.preventDefault();
 
                 const name = $('#jquery-name').val().trim();
@@ -114,9 +114,9 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').length ?
                             $('meta[name="csrf-token"]').attr('content') : $('input[name="_token"]')
-                            .val()
+                                .val()
                     },
-                    success: function(response) {
+                    success: function (response) {
                         $('#result')
                             .removeClass('result-error')
                             .addClass('result-success')
@@ -126,7 +126,7 @@
                             .text(JSON.stringify(response, null, 2))
                             .show();
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         let message = 'Something went wrong.';
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             message = xhr.responseJSON.message;
@@ -146,7 +146,7 @@
                             }, null, 2))
                             .show();
                     },
-                    complete: function() {
+                    complete: function () {
                         $btn.prop('disabled', false).text('{{ __('messages.generate') }}');
                     }
                 });

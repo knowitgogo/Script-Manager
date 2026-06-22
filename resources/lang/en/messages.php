@@ -137,4 +137,5 @@ return [
 
     'token_status_active' => 'Active',
     'token_status_disabled' => 'Disabled',
+    'requested_page_not_found' => 'Requested page not found. Showing the last page instead.',
 ];

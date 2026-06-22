@@ -21,6 +21,10 @@
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
 
+            @if (session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
+
             <div style="margin-top: 18px;">
                 <form method="GET" action="{{ route('admin.managers.index') }}"
                     style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">

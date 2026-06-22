@@ -16,6 +16,17 @@ class UserTokenController extends BaseController
     {
         $tokens = $tokenService->paginateForUser(Auth::user());
 
+        if ($tokens->lastPage() > 0 && $tokens->currentPage() > $tokens->lastPage()) {
+            $lastPageUrl = $request->fullUrlWithQuery(['page' => $tokens->lastPage()]);
+            if ($request->ajax()) {
+                return response()->json([
+                    'redirect' => $lastPageUrl,
+                    'message' => __('messages.requested_page_not_found'),
+                ]);
+            }
+            return redirect($lastPageUrl)->with('error', __('messages.requested_page_not_found'));
+        }
+
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('user.tokens.partials.table_and_pagination', compact('tokens'))->render(),
@@ -28,6 +39,13 @@ class UserTokenController extends BaseController
     public function create(TokenService $tokenService)
     {
         $tokens = $tokenService->paginateForUser(Auth::user());
+
+        if ($tokens->lastPage() > 0 && $tokens->currentPage() > $tokens->lastPage()) {
+            return redirect()->route('token.generate', array_merge(
+                request()->query(),
+                ['page' => $tokens->lastPage()]
+            ))->with('error', __('messages.requested_page_not_found'));
+        }
 
         return view('user.tokens.index', compact('tokens'))->with('showGenerate', true);
     }

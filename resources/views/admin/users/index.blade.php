@@ -18,6 +18,14 @@
                 </div>
             </div>
 
+            @if (session('success'))
+                <div class="alert alert-success" style="margin-top: 18px;">{{ session('success') }}</div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger" style="margin-top: 18px;">{{ session('error') }}</div>
+            @endif
+
             <div style="margin-top:18px;">
                 <form method="GET" action="{{ route('admin.users.index') }}"
                     style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
