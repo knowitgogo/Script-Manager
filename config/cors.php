@@ -13,7 +13,7 @@ return [
     */
 
     'enabled' => env('APP_DEBUG', true),
-    'paths' => ['api/*', 'user/chatbot/message', 'user/chatBot/message', "*", 'chat/*'],
+    'paths' => ['api/*', 'user/chatbot/message', 'user/chatBot/message', "*", 'chat/*', 'suggest/*', 'suggest/generate'],
     'allowed_origins' => ['*'],
     'allowed_origins_patterns' => [],
     'allowed_methods' => ['*'],

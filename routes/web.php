@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\ManagerAuthController;
 use App\Http\Controllers\UserAuthController;
 use App\Http\Controllers\UserTokenController;
+use App\Http\Controllers\SuggestIQController;
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\ManagerMiddleware;
@@ -92,6 +93,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/jquery-token-generation', [UserTokenController::class, 'jqueryGenerate'])
         ->name('tokens.jquery');
 
+    Route::get('/suggest', [SuggestIQController::class, 'index'])
+        ->name('suggest.index');
+        
+    Route::post('/suggest/generate', [SuggestIQController::class, 'generate'])
+        ->name('suggest.generate');
 });
 
 Route::get('/admin/register', [AdminAuthController::class, 'showRegistrationForm'])
