@@ -64,18 +64,31 @@ class UserAuthController extends BaseController
         return redirect()->route('login');
     }
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'user' => $request->user()
+            ]);
+        }
         return view('user.dashboard');
     }
 
-    public function status()
+    public function status(Request $request)
     {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'user' => $request->user()
+            ]);
+        }
         return view('user.status');
     }
 
-    public function requests()
+    public function requests(Request $request)
     {
+        if ($request->expectsJson()) {
+            return response()->json([]);
+        }
         return view('user.requests');
     }
 
@@ -90,7 +103,7 @@ class UserAuthController extends BaseController
             'name' => 'required|string|max:255',
         ]);
 
-        $token = Str::random(64);
+        $token = Str::random(16);
 
         return back()
             ->with('success', __('messages.token_generated_for', ['name' => $validated['name']]))

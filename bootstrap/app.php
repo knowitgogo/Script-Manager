@@ -20,11 +20,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'user/chatBot/message',
             'user/chatbot/message',
+            'chat/*',
+            'suggest/generate',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*'),
+            fn (Request $request) => $request->is('api/*') || $request->wantsJson()
         );
     })->create();
 

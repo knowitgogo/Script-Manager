@@ -19,6 +19,13 @@ class AdminAuthController extends BaseController
         $totalTokens = $tokenService->totalCount();
         $totalUsers = $userService->totalCount();
 
+        if (request()->wantsJson()) {
+            return response()->json([
+                'totalTokens' => $totalTokens,
+                'totalUsers' => $totalUsers
+            ]);
+        }
+
         return view('admin.dashboard', compact('totalTokens', 'totalUsers'));
     }
 
@@ -28,11 +35,18 @@ class AdminAuthController extends BaseController
         $totalManagers = $managerService->totalCount();
         $totalUsers = $userService->totalCount();
 
+        if (request()->wantsJson()) {
+            return response()->json(compact('totalAdmins', 'totalManagers', 'totalUsers'));
+        }
+
         return view('admin.status', compact('totalAdmins', 'totalManagers', 'totalUsers'));
     }
 
     public function requests()
     {
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Requests loaded']);
+        }
         return view('admin.requests');
     }
 
@@ -45,6 +59,10 @@ class AdminAuthController extends BaseController
                 request()->query(),
                 ['page' => $users->lastPage()]
             ))->with('error', __('messages.requested_page_not_found'));
+        }
+
+        if (request()->wantsJson()) {
+            return response()->json($users);
         }
 
         return view('admin.users.index', compact('users'));
@@ -61,6 +79,10 @@ class AdminAuthController extends BaseController
             ))->with('error', __('messages.requested_page_not_found'));
         }
 
+        if ($request->wantsJson()) {
+            return response()->json($tokens);
+        }
+
         return view('admin.tokens.index', compact('tokens'));
     }
 
@@ -75,7 +97,15 @@ class AdminAuthController extends BaseController
             'name' => 'required|string|max:255',
         ]);
 
-        $token = Str::random(64);
+        $token = Str::random(16);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => __('messages.token_generated_for', ['name' => $validated['name']]),
+                'token' => $token,
+                'token_name' => $validated['name']
+            ]);
+        }
 
         return back()
             ->with('success', __('messages.token_generated_for', ['name' => $validated['name']]))
@@ -95,6 +125,8 @@ class AdminAuthController extends BaseController
 
     public function register(Request $request, AdminService $adminService)
     {
+        \Log::info('Register attempt from frontend: ', $request->all());
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:admins,email',
@@ -103,12 +135,18 @@ class AdminAuthController extends BaseController
 
         $adminService->createAccount($validated);
 
-        return  redirect()->route('admin.login')->with('success', 'Admin account created successfully.');
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Admin account created successfully.']);
+        }
+
+        return redirect()->route('admin.login')->with('success', 'Admin account created successfully.');
     }
 
     
 public function login(Request $request, AuthService $authService)
 {
+    \Log::info('Login attempt from frontend: ', $request->all());
+
     $request->validate([
         'email' => 'required|email',
         'password' => 'required',
@@ -121,8 +159,14 @@ public function login(Request $request, AuthService $authService)
 
     if ($route) {
         $request->session()->regenerate();
-
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Login successful', 'redirect' => route($route)]);
+        }
         return redirect()->intended(route($route));
+    }
+
+    if ($request->wantsJson()) {
+        return response()->json(['message' => 'These credentials do not match our records.'], 422);
     }
 
     return back()->withErrors([
@@ -136,6 +180,10 @@ public function login(Request $request, AuthService $authService)
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Logged out successfully']);
+        }
 
         return redirect()->route('admin.login');
     }

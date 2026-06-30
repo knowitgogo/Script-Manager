@@ -29,7 +29,7 @@ class TokenController extends BaseController
             ], 422);
         }
 
-        $tokenValue = Str::random(64);
+        $tokenValue = Str::random(16);
 
         $token = $this->tokenService->createForUser(Auth::user(), [
             'name' => $validated['name'],

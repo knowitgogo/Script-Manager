@@ -18,15 +18,22 @@ class UserTokenController extends BaseController
 
         if ($tokens->lastPage() > 0 && $tokens->currentPage() > $tokens->lastPage()) {
             $lastPageUrl = $request->fullUrlWithQuery(['page' => $tokens->lastPage()]);
-            if ($request->ajax()) {
+            if ($request->expectsJson()) {
                 return response()->json([
                     'redirect' => $lastPageUrl,
                     'message' => __('messages.requested_page_not_found'),
-                ]);
+                ], 404);
             }
             return redirect($lastPageUrl)->with('error', __('messages.requested_page_not_found'));
         }
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'tokens' => $tokens
+            ]);
+        }
+
+        // Keep the old ajax logic just in case it's used elsewhere
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('user.tokens.partials.table_and_pagination', compact('tokens'))->render(),
@@ -36,9 +43,16 @@ class UserTokenController extends BaseController
         return view('user.tokens.index', compact('tokens'));
     }
 
-    public function create(TokenService $tokenService)
+    public function create(Request $request, TokenService $tokenService)
     {
         $tokens = $tokenService->paginateForUser(Auth::user());
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'tokens' => $tokens,
+                'showGenerate' => true
+            ]);
+        }
 
         if ($tokens->lastPage() > 0 && $tokens->currentPage() > $tokens->lastPage()) {
             return redirect()->route('token.generate', array_merge(
@@ -61,7 +75,7 @@ class UserTokenController extends BaseController
             'name' => 'required|string|max:255',
         ]);
 
-        $tokenValue = Str::random(64);
+        $tokenValue = Str::random(16);
 
         $tokenService->createForUser(Auth::user(), [
             'name' => $validated['name'],
@@ -85,9 +99,13 @@ class UserTokenController extends BaseController
             ->with('token_name', $validated['name']);
     }
 
-    public function edit(Token $token)
+    public function edit(Request $request, Token $token)
     {
         $this->authorizeToken($token);
+
+        if ($request->expectsJson()) {
+            return response()->json(['token' => $token]);
+        }
 
         return view('user.tokens.edit', compact('token'));
     }
@@ -102,28 +120,40 @@ class UserTokenController extends BaseController
 
         $tokenService->updateName($token, $validated['name']);
 
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Token updated successfully.', 'token' => $token]);
+        }
+
         return redirect()
             ->route('tokens.index')
             ->with('success', 'Token updated successfully.');
     }
 
-    public function destroy(Token $token, TokenService $tokenService)
+    public function destroy(Request $request, Token $token, TokenService $tokenService)
     {
         $this->authorizeToken($token);
         $tokenService->delete($token);
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Token deleted successfully.']);
+        }
 
         return redirect()
             ->route('tokens.index')
             ->with('success', 'Token deleted successfully.');
     }
 
-    public function disable(Token $token, TokenService $tokenService)
+    public function disable(Request $request, Token $token, TokenService $tokenService)
     {
         $this->authorizeToken($token);
 
         $tokenService->toggleDisabled($token);
 
         $message = $token->disabled ? 'Token disabled.' : 'Token enabled.';
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message, 'token' => $token]);
+        }
 
         return redirect()
             ->route('tokens.index')

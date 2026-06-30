@@ -19,6 +19,10 @@ class AdminManagerController extends BaseController
             ))->with('error', __('messages.requested_page_not_found'));
         }
 
+        if (request()->wantsJson()) {
+            return response()->json($managers);
+        }
+
         return view('admin.managers.index', compact('managers'));
     }
 
@@ -37,6 +41,10 @@ class AdminManagerController extends BaseController
 
         $managerService->createAccount($validated);
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Manager created successfully.']);
+        }
+
         return redirect()
             ->route('admin.managers.index')
             ->with('success', 'Manager created successfully.');
@@ -44,6 +52,9 @@ class AdminManagerController extends BaseController
 
     public function edit(\App\Models\Manager $manager)
     {
+        if (request()->wantsJson()) {
+            return response()->json(compact('manager'));
+        }
         return view('admin.managers.edit', compact('manager'));
     }
 
@@ -57,6 +68,10 @@ class AdminManagerController extends BaseController
 
         $managerService->updateProfile($manager, $validated);
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Manager updated successfully.']);
+        }
+
         return redirect()
             ->route('admin.managers.index')
             ->with('success', 'Manager updated successfully.');
@@ -65,6 +80,10 @@ class AdminManagerController extends BaseController
     public function destroy(\App\Models\Manager $manager, ManagerService $managerService)
     {
         $managerService->delete($manager);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Manager deleted successfully.']);
+        }
 
         return redirect()
             ->route('admin.managers.index')
@@ -81,12 +100,20 @@ class AdminManagerController extends BaseController
             ))->with('error', __('messages.requested_page_not_found'));
         }
 
+        if (request()->wantsJson()) {
+            return response()->json($managers);
+        }
+
         return view('admin.managers.deleted', compact('managers'));
     }
 
     public function restore($id)
     {
         app(ManagerService::class)->restore($id);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Manager restored successfully.']);
+        }
 
         return back()->with('success', 'Manager restored successfully.');
     }

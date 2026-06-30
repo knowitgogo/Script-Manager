@@ -58,6 +58,7 @@ Route::post('/logout', [UserAuthController::class, 'logout'])
 Route::post('/user/chatBot/message', [App\Http\Controllers\ChatBotController::class, 'sendUserMessage'])
     ->name('user.chatBot');
 Route::post('/user/chatbot/message', [App\Http\Controllers\ChatBotController::class, 'sendUserMessage']);
+Route::post('/chat/{token?}', [App\Http\Controllers\ChatBotController::class, 'sendUserMessage']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [UserAuthController::class, 'dashboard'])
@@ -95,11 +96,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/suggest', [SuggestIQController::class, 'index'])
         ->name('suggest.index');
-        
-    Route::post('/suggest/generate', [SuggestIQController::class, 'generate'])
-        ->name('suggest.generate');
+
+
 });
 
+
+
+Route::post('/suggest/generate', [SuggestIQController::class, 'generate'])
+    ->name('suggest.generate');
 Route::get('/admin/register', [AdminAuthController::class, 'showRegistrationForm'])
     ->name('admin.register');
 

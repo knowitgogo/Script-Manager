@@ -17,6 +17,10 @@ class ManagerMiddleware
             return $next($request);
         }
 
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
         return redirect()->route('manager.login');
     }
 }

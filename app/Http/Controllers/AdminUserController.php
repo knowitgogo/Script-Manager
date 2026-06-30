@@ -24,6 +24,10 @@ class AdminUserController extends BaseController
 
         $userService->createAccount($validated);
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'User created successfully.']);
+        }
+
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'User created successfully.');
@@ -31,6 +35,9 @@ class AdminUserController extends BaseController
 
     public function edit(User $user)
     {
+        if (request()->wantsJson()) {
+            return response()->json(compact('user'));
+        }
         return view('admin.users.edit', compact('user'));
     }
 
@@ -44,6 +51,10 @@ class AdminUserController extends BaseController
 
         $userService->updateProfile($user, $validated);
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'User updated successfully.']);
+        }
+
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'User updated successfully.');
@@ -53,6 +64,10 @@ class AdminUserController extends BaseController
 {
     $userService->delete($user);
 
+    if (request()->wantsJson()) {
+        return response()->json(['message' => 'User deleted successfully.']);
+    }
+
     return redirect()
         ->route('admin.users.index')
         ->with('success', 'User deleted successfully.');
@@ -61,12 +76,20 @@ public function restore($id)
 {
     app(UserService::class)->restore($id);
 
+    if (request()->wantsJson()) {
+        return response()->json(['message' => 'User restored successfully.']);
+    }
+
     return back()->with('success', 'User restored successfully.');
 }
 
 public function deleted()
 {
     $users = app(UserService::class)->deleted();
+
+    if (request()->wantsJson()) {
+        return response()->json($users);
+    }
 
     return view('admin.users.deleted', compact('users'));
 }
@@ -76,6 +99,10 @@ public function deleted()
         app(UserService::class)->setDisabled($user, ! $user->disabled);
 
         $message = $user->disabled ? 'User disabled successfully.' : 'User enabled successfully.';
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => $message]);
+        }
 
         return redirect()
             ->route('admin.users.index')

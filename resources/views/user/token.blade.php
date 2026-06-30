@@ -104,7 +104,7 @@
 @endsection
 
 @section('scripts')
-    <script src="http://localhost:4173/chatbot.iife.js" data-api-url="http://localhost:5000/chat"></script>
+    <script src="http://localhost:4173/chatbot.iife.js" data-api-url="{{ url('/chat') }}"></script>
     <script>
         (function () {
             const modal = document.getElementById('tokenModal');
