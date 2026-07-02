@@ -11,6 +11,9 @@ class TokenService
     public function paginateForUser(User $user, int $perPage = 10): LengthAwarePaginator
     {
         return $user->tokens()
+            ->withCount(['usages as usages_24h_count' => function ($query) {
+                $query->where('created_at', '>=', now()->subHours(24));
+            }])
             ->latest('created_at')
             ->paginate($perPage);
     }
@@ -46,6 +49,7 @@ class TokenService
         return $user->tokens()->create([
             'name' => $data['name'],
             'token' => $data['token'],
+            'expires_at' => $data['expires_at'] ?? null,
         ]);
     }
 

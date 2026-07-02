@@ -30,7 +30,7 @@ class TokenController extends BaseController
                     })
                 ],
             ], [
-                'name.unique' => 'This token already exists.'
+                'name.unique' => 'that token name is already exist give different name'
             ]);
         } catch (ValidationException $e) {
             return response()->json([

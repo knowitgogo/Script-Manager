@@ -81,15 +81,27 @@ class UserTokenController extends BaseController
                     return $query->where('user_id', Auth::id());
                 })
             ],
+            'expiry' => 'nullable|string|in:never,7_days,30_days,60_days,90_days,custom',
         ], [
-            'name.unique' => 'This token already exists.'
+            'name.unique' => 'that token name is already exist give different name'
         ]);
 
         $tokenValue = Str::random(16);
 
+        $expiresAt = null;
+        if (!empty($validated['expiry']) && $validated['expiry'] !== 'never') {
+            switch ($validated['expiry']) {
+                case '7_days': $expiresAt = now()->addDays(7); break;
+                case '30_days': $expiresAt = now()->addDays(30); break;
+                case '60_days': $expiresAt = now()->addDays(60); break;
+                case '90_days': $expiresAt = now()->addDays(90); break;
+            }
+        }
+
         $tokenService->createForUser(Auth::user(), [
             'name' => $validated['name'],
             'token' => $tokenValue,
+            'expires_at' => $expiresAt,
         ]);
 
         if ($request->expectsJson()) {
@@ -134,7 +146,7 @@ class UserTokenController extends BaseController
                 })->ignore($token->id)
             ],
         ], [
-            'name.unique' => 'This token already exists.'
+            'name.unique' => 'that token name is already exist give different name'
         ]);
 
         $tokenService->updateName($token, $validated['name']);

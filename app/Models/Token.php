@@ -17,15 +17,22 @@ class Token extends Model
         'name',
         'token',
         'disabled',
+        'expires_at',
     ];
 
     protected $casts = [
         'disabled' => 'boolean',
+        'expires_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function usages()
+    {
+        return $this->hasMany(TokenUsage::class);
     }
 
     public static function createForUser(User $user, array $data): self

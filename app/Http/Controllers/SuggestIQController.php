@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\JsonResponse;
 
 class SuggestIQController extends BaseController
 {
@@ -15,8 +16,38 @@ class SuggestIQController extends BaseController
         return view('user.suggest');
     }
 
-    public function generate(Request $request)
+    public function generate(Request $request): JsonResponse
     {
+        // ── 0. Token Extraction & Verification ────────────────────────
+        $tokenString = $request->bearerToken() 
+            ?? $request->header('X-API-Key') 
+            ?? $request->input('api_key');
+
+        if (!$tokenString) {
+            return response()->json(['error' => 'API token missing.'], 401);
+        }
+
+        $tokenRecord = \App\Models\Token::with('user')->where('token', $tokenString)->first();
+
+        if (!$tokenRecord || $tokenRecord->disabled) {
+            return response()->json(['error' => 'Invalid or disabled token.'], 401);
+        }
+
+        if ($tokenRecord->expires_at && now()->greaterThan($tokenRecord->expires_at)) {
+            return response()->json(['error' => 'Token has expired.'], 401);
+        }
+
+        if (!$tokenRecord->user || $tokenRecord->user->disabled) {
+            return response()->json(['error' => 'User account is disabled.'], 401);
+        }
+
+        // ── 0.5. Rate Limiting ────────────────────────────────────────
+        $limiterKey = 'suggest_api_' . $tokenString;
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($limiterKey, 10)) {
+            return response()->json(['error' => 'Too Many Requests. Rate limit exceeded.'], 429);
+        }
+        \Illuminate\Support\Facades\RateLimiter::hit($limiterKey, 60);
+
         // ── 1. Validate input ──────────────────────────────────────────
         $validator = Validator::make($request->all(), [
             'query' => 'required|string|max:500',
@@ -173,6 +204,15 @@ PROMPT;
         ])->values()->toArray();
 
         Log::info('SuggestIQ: Returning ' . count($clean) . ' suggestions for query: ' . $query);
+
+        // ── 9. Log Usage ──────────────────────────────────────────────
+        \App\Models\TokenUsage::create([
+            'token_id' => $tokenRecord->id,
+            'user_id' => $tokenRecord->user_id,
+            'query' => $query,
+            'response' => json_encode($clean, JSON_UNESCAPED_UNICODE),
+        ]);
+        $tokenRecord->increment('usage_count');
 
         return response()->json($clean);
     }

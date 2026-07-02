@@ -95,7 +95,27 @@ class UserAuthController extends BaseController
     public function requests(Request $request)
     {
         if ($request->expectsJson()) {
-            return response()->json([]);
+            $user = $request->user();
+            
+            // Fetch token usages with token name
+            $tokenUsages = \App\Models\TokenUsage::where('user_id', $user->id)
+                ->with('token:id,name')
+                ->latest()
+                ->get();
+
+            // Aggregate analytics: Top queries in the last 7 days
+            $analytics = \App\Models\TokenUsage::where('user_id', $user->id)
+                ->where('created_at', '>=', now()->subDays(7))
+                ->selectRaw('query, count(*) as count')
+                ->groupBy('query')
+                ->orderByDesc('count')
+                ->limit(5)
+                ->get();
+
+            return response()->json([
+                'requests' => $tokenUsages,
+                'analytics' => $analytics,
+            ]);
         }
         return view('user.requests');
     }

@@ -61,6 +61,11 @@ class User extends Authenticatable
         return $this->hasMany(Token::class);
     }
 
+    public function tokenUsages(): HasMany
+    {
+        return $this->hasMany(TokenUsage::class);
+    }
+
     public function tokensForListing(int $perPage = 10): LengthAwarePaginator
     {
         return $this->tokens()->recent()->paginate($perPage);
