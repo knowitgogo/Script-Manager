@@ -118,8 +118,8 @@ class UserAuthController extends BaseController
             ->with('token', $token)
             ->with('token_name', $validated['name']);
     }
-    
-public function deleted()
+
+    public function deleted()
     {
         $users = app(UserService::class)->deleted();
 
