@@ -27,11 +27,19 @@ class ManagerAuthController extends BaseController
         if (Auth::guard('manager')->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Login successful', 'redirect' => route('manager.dashboard')]);
+            }
+
             return redirect()->intended(route('manager.dashboard'));
         }
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Invalid email or password'], 422);
+        }
+
         return back()->withErrors([
-            'email' => 'These credentials do not match our records.',
+            'email' => 'Invalid email or password',
         ])->onlyInput('email');
     }
 
@@ -42,13 +50,25 @@ class ManagerAuthController extends BaseController
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Logged out successfully']);
+        }
+
         return redirect()->route('manager.login');
     }
 
-    public function dashboard(UserService $userService)
+    public function dashboard(Request $request, UserService $userService)
     {
         $totalUsers = $userService->totalCount();
         $disabledUsers = $userService->disabledCount();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'totalUsers' => $totalUsers,
+                'disabledUsers' => $disabledUsers,
+                'manager' => Auth::guard('manager')->user()
+            ]);
+        }
 
         return view('manager.dashboard', compact('totalUsers', 'disabledUsers'));
     }
@@ -64,19 +84,31 @@ class ManagerAuthController extends BaseController
             ))->with('error', __('messages.requested_page_not_found'));
         }
 
+        if ($request->wantsJson()) {
+            return response()->json($users);
+        }
+
         return view('manager.users.index', compact('users'));
     }
 
-    public function disable(User $user, UserService $userService)
+    public function disable(Request $request, User $user, UserService $userService)
     {
         $userService->setDisabled($user, true);
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'User disabled successfully.']);
+        }
 
         return back()->with('success', 'User disabled successfully.');
     }
 
-    public function enable(User $user, UserService $userService)
+    public function enable(Request $request, User $user, UserService $userService)
     {
         $userService->setDisabled($user, false);
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'User enabled successfully.']);
+        }
 
         return back()->with('success', 'User enabled successfully.');
     }

@@ -124,13 +124,15 @@ PROMPT;
 
         if (empty($content)) {
             Log::error('SuggestIQ: Empty content in AI response', $response->json() ?? []);
-            return response()->json([[
-                'id' => null,
-                'name' => 'Hotels not available with this type of prompt',
-                'sub' => '',
-                'type' => 'default',
-                'desc' => 'The AI returned an empty response. Please try a different search query.',
-            ]]);
+            return response()->json([
+                [
+                    'id' => null,
+                    'name' => 'Hotels not available with this type of prompt',
+                    'sub' => '',
+                    'type' => 'default',
+                    'desc' => 'The AI returned an empty response. Please try a different search query.',
+                ]
+            ]);
         }
 
         // Strip markdown fences just in case (some models still add them)
@@ -148,13 +150,15 @@ PROMPT;
 
         if (!is_array($suggestions) || empty($suggestions)) {
             Log::error('SuggestIQ: Missing suggestions array', $parsed);
-            return response()->json([[
-                'id' => null,
-                'name' => 'Hotels not available with this type of prompt',
-                'sub' => '',
-                'type' => 'default',
-                'desc' => 'Please try a different search query.',
-            ]]);
+            return response()->json([
+                [
+                    'id' => null,
+                    'name' => 'Hotels not available with this type of prompt',
+                    'sub' => '',
+                    'type' => 'default',
+                    'desc' => 'Please try a different search query.',
+                ]
+            ]);
         }
 
         // ── 8. Sanitise each suggestion ───────────────────────────────

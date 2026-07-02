@@ -166,11 +166,11 @@ public function login(Request $request, AuthService $authService)
     }
 
     if ($request->wantsJson()) {
-        return response()->json(['message' => 'These credentials do not match our records.'], 422);
+        return response()->json(['message' => 'Invalid email or password'], 422);
     }
 
     return back()->withErrors([
-        'email' => 'These credentials do not match our records.',
+        'email' => 'Invalid email or password',
     ])->onlyInput('email');
 }
 

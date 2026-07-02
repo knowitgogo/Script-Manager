@@ -9,6 +9,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Services\TokenService;
+use Illuminate\Validation\Rule;
 
 class UserTokenController extends BaseController
 {
@@ -72,7 +73,16 @@ class UserTokenController extends BaseController
     public function store(Request $request, TokenService $tokenService)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('tokens')->where(function ($query) {
+                    return $query->where('user_id', Auth::id());
+                })
+            ],
+        ], [
+            'name.unique' => 'This token already exists.'
         ]);
 
         $tokenValue = Str::random(16);
@@ -115,7 +125,16 @@ class UserTokenController extends BaseController
         $this->authorizeToken($token);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('tokens')->where(function ($query) {
+                    return $query->where('user_id', Auth::id());
+                })->ignore($token->id)
+            ],
+        ], [
+            'name.unique' => 'This token already exists.'
         ]);
 
         $tokenService->updateName($token, $validated['name']);

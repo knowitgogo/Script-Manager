@@ -46,11 +46,19 @@ class UserAuthController extends BaseController
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Login successful', 'redirect' => route('dashboard')]);
+            }
+
             return redirect()->intended(route('dashboard'));
         }
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Invalid email or password'], 422);
+        }
+
         return back()->withErrors([
-            'email' => 'These credentials do not match our records.',
+            'email' => 'Invalid email or password',
         ])->onlyInput('email');
     }
 

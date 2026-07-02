@@ -9,6 +9,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
 
 class TokenController extends BaseController
 {
@@ -20,7 +21,16 @@ class TokenController extends BaseController
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:255',
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('tokens')->where(function ($query) {
+                        return $query->where('user_id', Auth::id());
+                    })
+                ],
+            ], [
+                'name.unique' => 'This token already exists.'
             ]);
         } catch (ValidationException $e) {
             return response()->json([
