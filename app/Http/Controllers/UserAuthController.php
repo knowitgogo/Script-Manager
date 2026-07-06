@@ -120,6 +120,39 @@ class UserAuthController extends BaseController
         return view('user.requests');
     }
 
+    public function analytics(Request $request)
+    {
+        if ($request->expectsJson()) {
+            $user = $request->user();
+
+            // Requests per day for the last 30 days
+            $daily = \App\Models\TokenUsage::where('user_id', $user->id)
+                ->where('created_at', '>=', now()->subDays(29)->startOfDay())
+                ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+                ->groupBy('date')
+                ->orderBy('date', 'asc')
+                ->get()
+                ->keyBy('date');
+
+            // Build full 30-day range (fill gaps with 0)
+            $result = [];
+            for ($i = 29; $i >= 0; $i--) {
+                $date = now()->subDays($i)->format('Y-m-d');
+                $result[] = [
+                    'date'  => $date,
+                    'count' => isset($daily[$date]) ? (int) $daily[$date]->count : 0,
+                ];
+            }
+
+            return response()->json([
+                'activity' => $result,
+                'total'    => array_sum(array_column($result, 'count')),
+            ]);
+        }
+
+        return response()->json(['error' => 'JSON expected'], 400);
+    }
+
     public function showTokenGenerateForm()
     {
         return view('user.token');

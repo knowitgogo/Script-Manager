@@ -70,6 +70,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/requests', [UserAuthController::class, 'requests'])
         ->name('requests');
 
+    Route::get('/analytics', [UserAuthController::class, 'analytics'])
+        ->name('analytics');
+
     Route::get('/token/generate', [UserTokenController::class, 'create'])
         ->name('token.generate');
 
