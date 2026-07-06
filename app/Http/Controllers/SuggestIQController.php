@@ -51,7 +51,7 @@ class SuggestIQController extends BaseController
         // ── 1. Validate input ──────────────────────────────────────────
         $validator = Validator::make($request->all(), [
             'query' => 'required|string|max:500',
-            'pageContext' => 'nullable|array|max:20',
+            'pageContext' => 'nullable|array',
             'pageContext.*' => 'array',
         ]);
 
@@ -133,7 +133,7 @@ PROMPT;
                         ['role' => 'user', 'content' => $userMessage],
                     ],
                     'response_format' => ['type' => 'json_object'], // forces valid JSON ✅
-                    'temperature' => 0.3,   // low = predictable format
+                    'temperature' => 0.8,   // higher = more variety on repeated prompts
                     'max_tokens' => 700,   // 3–5 suggestions is well within this
                 ]);
 
