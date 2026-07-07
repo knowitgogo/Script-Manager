@@ -29,12 +29,14 @@ class TokenService
     {
         return Token::query()
             ->with('user')
+            ->withMax('usages', 'created_at')
             ->where(function ($query) use ($search) {
                 if ($search) {
                     $query->where('name', 'like', "%{$search}%")
                         ->orWhere('token', 'like', "%{$search}%");
                 }
             })
+            ->orderBy('usages_max_created_at', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
     }

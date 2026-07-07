@@ -97,11 +97,10 @@ class UserAuthController extends BaseController
         if ($request->expectsJson()) {
             $user = $request->user();
             
-            // Fetch token usages with token name
             $tokenUsages = \App\Models\TokenUsage::where('user_id', $user->id)
-                ->with('token:id,name')
+                ->with(['token:id,name', 'user:id,name'])
                 ->latest()
-                ->get();
+                ->paginate(10);
 
             // Aggregate analytics: Top queries in the last 7 days
             $analytics = \App\Models\TokenUsage::where('user_id', $user->id)
@@ -113,7 +112,12 @@ class UserAuthController extends BaseController
                 ->get();
 
             return response()->json([
-                'requests' => $tokenUsages,
+                'requests' => $tokenUsages->items(),
+                'pagination' => [
+                    'current_page' => $tokenUsages->currentPage(),
+                    'last_page' => $tokenUsages->lastPage(),
+                    'total' => $tokenUsages->total(),
+                ],
                 'analytics' => $analytics,
             ]);
         }
