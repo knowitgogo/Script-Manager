@@ -8,12 +8,17 @@ use Illuminate\Database\Eloquent\Collection;
 
 class UserService
 {
-    public function paginateSearchResults(?string $search, int $perPage = 10): LengthAwarePaginator
+    public function paginateSearchResults(?string $search, ?string $filter = null, int $perPage = 10): LengthAwarePaginator
     {
-        return User::query()
-            ->search($search)
-            ->latest()
-            ->paginate($perPage);
+        $query = User::query()->search($search);
+        
+        if ($filter === 'disabled') {
+            $query->where('disabled', true);
+        } elseif ($filter === 'active') {
+            $query->where('disabled', false);
+        }
+        
+        return $query->latest()->paginate($perPage);
     }
 
     public function totalCount(): int
@@ -40,7 +45,7 @@ class UserService
         $user->name = $data['name'];
         $user->email = $data['email'];
 
-        if (! empty($data['password'])) {
+        if (!empty($data['password'])) {
             $user->password = $data['password'];
         }
 

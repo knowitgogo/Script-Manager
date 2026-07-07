@@ -75,7 +75,7 @@ class ManagerAuthController extends BaseController
 
     public function users(Request $request, UserService $userService)
     {
-        $users = $userService->paginateSearchResults($request->query('search'));
+        $users = $userService->paginateSearchResults($request->query('search'), $request->query('filter'));
 
         if ($users->lastPage() > 0 && $users->currentPage() > $users->lastPage()) {
             return redirect()->route('manager.users.index', array_merge(

@@ -82,8 +82,10 @@ class UserTokenController extends BaseController
                 })
             ],
             'expiry' => 'nullable|string|in:never,7_days,30_days,60_days,90_days,custom',
+            'custom_date' => 'nullable|date|after:today',
         ], [
-            'name.unique' => 'that token name is already exist give different name'
+            'name.unique' => 'that token name is already exist give different name',
+            'custom_date.after' => 'Custom expiration date must be in the future.',
         ]);
 
         $tokenValue = Str::random(16);
@@ -95,6 +97,11 @@ class UserTokenController extends BaseController
                 case '30_days': $expiresAt = now()->addDays(30); break;
                 case '60_days': $expiresAt = now()->addDays(60); break;
                 case '90_days': $expiresAt = now()->addDays(90); break;
+                case 'custom':
+                    if (!empty($validated['custom_date'])) {
+                        $expiresAt = \Carbon\Carbon::parse($validated['custom_date'])->endOfDay();
+                    }
+                    break;
             }
         }
 
