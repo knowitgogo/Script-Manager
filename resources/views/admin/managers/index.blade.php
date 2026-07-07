@@ -1,78 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Managers</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: ui-sans-serif, system-ui, sans-serif; background: #f8fafc; color: #111827; }
-        nav { background: #1e293b; color: white; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
-        nav a { color: white; text-decoration: none; padding: 8px 16px; margin: 0 8px; border-radius: 6px; }
-        nav a:hover { background: #334155; }
-        nav .logout { background: #dc2626; }
-        nav .logout:hover { background: #b91c1c; }
-        .container { max-width: 1200px; margin: 32px auto; padding: 20px; }
-        .card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 28px; box-shadow: 0 10px 30px rgba(15,23,42,.08); }
-        .button { background: #2563eb; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
-        .button:hover { background: #1d4ed8; }
-        .button.secondary { background: #64748b; }
-        .button.secondary:hover { background: #475569; }
-        .message { margin-bottom: 16px; padding: 12px 14px; border-radius: 8px; }
-        .success { background: #ecfdf5; color: #166534; border: 1px solid #bbf7d0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 14px 12px; border-bottom: 1px solid #e5e7eb; text-align: left; }
-        th { background: #f1f5f9; color: #0f172a; }
-        tr:hover { background: #f8fafc; }
-        .actions { display: flex; gap: 8px; flex-wrap: wrap; }
-        .danger { background: #dc2626; }
-        .danger:hover { background: #b91c1c; }
-    </style>
-</head>
-<body>
-    <nav>
-        <div>
-            <a href="{{ route('admin.dashboard') }}">Dashboard</a>
-            <a href="{{ route('admin.status') }}">Status</a>
-            <a href="{{ route('admin.requests') }}">Requests</a>
-            <a href="{{ route('admin.token.generate') }}">Generate Token</a>
-            <a href="{{ route('admin.users.index') }}">Users</a>
-            <a href="{{ route('admin.managers.index') }}">Managers</a>
-            <a href="{{ route('admin.managers.create') }}">Create Manager</a>
-        </div>
-        <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="color: white; font-size: 14px;">
-                <div style="font-weight: 600;">{{ auth('admin')->user()->name ?? 'Admin' }}</div>
-                <div style="font-size: 12px; opacity: 0.9;">{{ auth('admin')->user()->email ?? '' }}</div>
-            </div>
-            <form method="POST" action="{{ route('admin.logout') }}" style="display:inline;">
-                @csrf
-                <button type="submit" class="button logout" style="border: none; padding: 8px 16px;">Logout</button>
-            </form>
-        </div>
-    </nav>
+@extends('layouts.admin')
+
+@section('title', __('messages.managers'))
+
+@section('admin_content')
 
     <div class="container">
         <div class="card">
-            <h1>Managers</h1>
-            <p>Review and manage all managers in the application.</p>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                <div>
+                    <h1>{{ __('messages.managers') }}</h1>
+                    <p>{{ __('messages.total_records') }}: {{ $managers->total() }}</p>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <a href="{{ route('admin.managers.create') }}" class="button">{{ __('messages.create_manager_button') }}</a>
+                    <a href="{{ route('admin.managers.deleted') }}" class="button secondary">{{ __('messages.show_deleted') }}</a>
+                </div>
+            </div>
 
             @if (session('success'))
-                <div class="message success">{{ session('success') }}</div>
+                <div class="alert alert-success">{{ session('success') }}</div>
             @endif
 
-            <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <div></div>
-                <a href="{{ route('admin.managers.create') }}" class="button">Create Manager</a>
+            @if (session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
+
+            <div style="margin-top: 18px;">
+                <form method="GET" action="{{ route('admin.managers.index') }}"
+                    style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <input type="text" name="search" placeholder="{{ __('messages.search') }}..."
+                        value="{{ request('search') }}" />
+                    <button type="submit" class="button secondary">{{ __('messages.search') }}</button>
+                    @if (request('search'))
+                        <a href="{{ route('admin.managers.index') }}"
+                            class="button secondary">{{ __('messages.clear') }}</a>
+                    @endif
+                </form>
             </div>
 
             <table>
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Created</th>
-                        <th>Actions</th>
+                        <th>{{ __('messages.label_name') }}</th>
+                        <th>{{ __('messages.label_email') }}</th>
+                        <th>{{ __('messages.created') }}</th>
+                        <th>{{ __('messages.label_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -81,23 +53,55 @@
                             <td>{{ $manager->name }}</td>
                             <td>{{ $manager->email }}</td>
                             <td>{{ $manager->created_at->format('Y-m-d') }}</td>
-                            <td class="actions">
-                                <a href="{{ route('admin.managers.edit', $manager) }}" class="button secondary">Edit</a>
-                                <form method="POST" action="{{ route('admin.managers.destroy', $manager) }}" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="button danger" onclick="return confirm('Delete this manager?');">Delete</button>
-                                </form>
+                            <td>
+                                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                    <a href="{{ route('admin.managers.edit', $manager) }}"
+                                        class="button secondary">{{ __('messages.edit') }}</a>
+                                    <form method="POST" action="{{ route('admin.managers.destroy', $manager) }}"
+                                        style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="button danger"
+                                            onclick="return confirm('{{ __('messages.confirm_delete') }}');">{{ __('messages.delete') }}</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" style="padding: 20px 12px; text-align: center; color: #475569;">No managers found yet.</td>
+                            <td colspan="4" style="padding: 20px 12px; text-align: center; color: var(--color-text-muted);">{{ __('messages.no_records') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+            <div class="pagination-simple">
+                @if ($managers->onFirstPage())
+                    <span class="disabled">{{ __('messages.previous') }}</span>
+                @else
+                    <a href="{{ $managers->previousPageUrl() }}">{{ __('messages.previous') }}</a>
+                @endif
+
+                @if ($managers->hasMorePages())
+                    <a href="{{ $managers->nextPageUrl() }}">{{ __('messages.next') }}</a>
+                @else
+                    <span class="disabled">{{ __('messages.next') }}</span>
+                @endif
+            </div>
+            <div class="page-jump">
+                <span>
+                    {{ __('messages.page') }} {{ $managers->currentPage() }} {{ __('messages.of') }} {{ $managers->lastPage() }}
+                </span>
+
+                <form method="GET" action="{{ route('admin.managers.index') }}">
+                    @foreach (request()->except('page') as $key => $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endforeach
+                    <input type="number" name="page" min="1" max="{{ $managers->lastPage() }}"
+                        value="{{ $managers->currentPage() }}">
+                    <button type="submit" class="button secondary">{{ __('messages.go') }}</button>
+                </form>
+            </div>
         </div>
     </div>
-</body>
-</html>
+
+@endsection

@@ -1,61 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <style>
-        body { font-family: ui-sans-serif, system-ui, sans-serif; background: #f8fafc; color: #111827; padding: 32px; }
-        .container { max-width: 420px; margin: 0 auto; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 28px; box-shadow: 0 10px 30px rgba(15,23,42,.08); }
-        .field { margin-bottom: 18px; }
-        .label { display: block; font-weight: 600; margin-bottom: 8px; }
-        .input { width: 100%; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 8px; }
-        .button { background: #2563eb; color: white; border: none; padding: 12px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .button:hover { background: #1d4ed8; }
-        .message { margin-bottom: 16px; padding: 12px 14px; border-radius: 8px; }
-        .success { background: #ecfdf5; color: #166534; border: 1px solid #bbf7d0; }
-        .errors { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-        .errors li { margin-bottom: 6px; }
-        .helper { margin-top: 16px; font-size: 14px; color: #475569; }
-        .helper a { color: #2563eb; text-decoration: none; }
+@extends('layouts.app')
+
+@section('title', __('messages.login') ?? 'Login')
+
+@section('styles')
+<style>
+        body { padding: 32px; }
+        .container { max-width: 420px; margin: 0 auto; }
+        .helper { margin-top: 16px; font-size: 14px; color: var(--color-text-muted); }
+        .helper a { color: var(--color-primary); text-decoration: none; }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Login</h1>
+@endsection
 
-        @if (session('success'))
-            <div class="message success">{{ session('success') }}</div>
-        @endif
+@section('content')
 
-        @if ($errors->any())
-            <div class="message errors">
-                <strong>There are some problems with your submission:</strong>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+<div class="container">
+        <div class="card">
+            <h1>{{ __('messages.login') ?? 'Login' }}</h1>
 
-        <form method="POST" action="{{ route('login.post') }}">
-            @csrf
+            @if (session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
 
-            <div class="field">
-                <label class="label" for="email">Email</label>
-                <input class="input" id="email" name="email" type="email" value="{{ old('email') }}" required autofocus />
-            </div>
+            @if (session('status'))
+                <div class="alert alert-success">{{ session('status') }}</div>
+            @endif
 
-            <div class="field">
-                <label class="label" for="password">Password</label>
-                <input class="input" id="password" name="password" type="password" required autocomplete="current-password" />
-            </div>
+            <form method="POST" action="{{ route('login.post') }}">
+                @csrf
 
-            <button class="button" type="submit">Login</button>
-        </form>
+                <div class="field">
+                    <label class="label" for="email">{{ __('messages.label_email') }}</label>
+                    <input class="input @error('email') is-invalid @enderror" id="email" name="email" type="email"
+                        value="{{ old('email') }}" required autofocus />
+                    @error('email')
+                        <span class="field-error">{{ $message }}</span>
+                    @enderror
+                </div>
 
-        <p class="helper">Don’t have an account? <a href="{{ route('register') }}">Register here</a>.</p>
+                <div class="field">
+                    <label class="label" for="password">{{ __('messages.password') ?? 'Password' }}</label>
+                    <input class="input @error('password') is-invalid @enderror" id="password" name="password" type="password" required autocomplete="current-password" />
+                    @error('password')
+                        <span class="field-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <button class="button" type="submit">{{ __('messages.login') ?? 'Login' }}</button>
+            </form>
+
+            <p class="helper">{{ __('messages.dont_have_account') ?? "Don't have an account?" }} <a href="{{ route('register') }}">{{ __('messages.register_here') ?? 'Register here' }}</a>.</p>
+        </div>
     </div>
-</body>
-</html>
+
+@endsection

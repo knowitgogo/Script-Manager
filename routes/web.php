@@ -5,19 +5,40 @@ use App\Models\Admin;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminManagerController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\ManagerAuthController;
 use App\Http\Controllers\UserAuthController;
 use App\Http\Controllers\UserTokenController;
+use App\Http\Controllers\SuggestIQController;
+
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\ManagerMiddleware;
+use Illuminate\Http\Request;
+use App\Http\Middleware\SetLocale;
 
-Route::get('/test-admin', function () {
-    $admin = Admin::create([
-        'name' => 'Test Admin',
-        'email' => 'test@example.com',
-        'password' => bcrypt('123456'),
+Route::get('/locale', function (Request $request) {
+    $lang = $request->query('lang', config('app.locale'));
+
+    if (!in_array($lang, ['en', 'nl'])) {
+        $lang = config('app.locale');
+    }
+
+    session(['locale' => $lang]);
+
+    return back();
+})->name('locale.switch');
+
+Route::post('/theme', [\App\Http\Controllers\ThemeController::class, 'update'])
+    ->name('theme.update');
+
+Route::get('/debug-translation', function () {
+    return response()->json([
+        'locale' => app()->getLocale(),
+        'session_locale' => session('locale'),
+        'status' => __('messages.status'),
     ]);
-
-    return $admin;
 });
+// end SetLocale wrapper
+
 
 Route::get('/register', [UserAuthController::class, 'showRegistrationForm'])
     ->name('register');
@@ -34,6 +55,11 @@ Route::post('/login', [UserAuthController::class, 'login'])
 Route::post('/logout', [UserAuthController::class, 'logout'])
     ->name('logout');
 
+Route::post('/user/chatBot/message', [App\Http\Controllers\ChatBotController::class, 'sendUserMessage'])
+    ->name('user.chatBot');
+Route::post('/user/chatbot/message', [App\Http\Controllers\ChatBotController::class, 'sendUserMessage']);
+Route::post('/chat/{token?}', [App\Http\Controllers\ChatBotController::class, 'sendUserMessage']);
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [UserAuthController::class, 'dashboard'])
         ->name('dashboard');
@@ -43,6 +69,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/requests', [UserAuthController::class, 'requests'])
         ->name('requests');
+
+    Route::get('/analytics', [UserAuthController::class, 'analytics'])
+        ->name('analytics');
 
     Route::get('/token/generate', [UserTokenController::class, 'create'])
         ->name('token.generate');
@@ -64,8 +93,20 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/tokens/{token}/disable', [UserTokenController::class, 'disable'])
         ->name('tokens.disable');
+
+    Route::get('/jquery-token-generation', [UserTokenController::class, 'jqueryGenerate'])
+        ->name('tokens.jquery');
+
+    Route::get('/suggest', [SuggestIQController::class, 'index'])
+        ->name('suggest.index');
+
+
 });
 
+
+
+Route::post('/suggest/generate', [SuggestIQController::class, 'generate'])
+    ->name('suggest.generate');
 Route::get('/admin/register', [AdminAuthController::class, 'showRegistrationForm'])
     ->name('admin.register');
 
@@ -80,6 +121,32 @@ Route::post('/admin/login', [AdminAuthController::class, 'login'])
 
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])
     ->name('admin.logout');
+
+Route::get('/manager/login', [ManagerAuthController::class, 'showLoginForm'])
+    ->name('manager.login');
+
+Route::post('/manager/login', [ManagerAuthController::class, 'login'])
+    ->name('manager.login.post');
+
+Route::post('/manager/logout', [ManagerAuthController::class, 'logout'])
+    ->name('manager.logout');
+
+Route::middleware(ManagerMiddleware::class)->group(function () {
+    Route::get('/manager/dashboard', [ManagerAuthController::class, 'dashboard'])
+        ->name('manager.dashboard');
+
+    Route::get('/manager/users', [ManagerAuthController::class, 'users'])
+        ->name('manager.users.index');
+
+    Route::post('/manager/users/{user}/disable', [ManagerAuthController::class, 'disable'])
+        ->name('manager.users.disable');
+
+    Route::post('/manager/users/{user}/enable', [ManagerAuthController::class, 'enable'])
+        ->name('manager.users.enable');
+
+    Route::get('/manager/users/disabled', [ManagerAuthController::class, 'disabledUsers'])
+        ->name('manager.users.disabled');
+});
 
 Route::middleware(AdminMiddleware::class)->group(function () {
     Route::get('/admin/dashboard', [AdminAuthController::class, 'dashboard'])
@@ -100,8 +167,14 @@ Route::middleware(AdminMiddleware::class)->group(function () {
     Route::get('/admin/users', [AdminAuthController::class, 'users'])
         ->name('admin.users.index');
 
+    Route::get('/admin/tokens', [AdminAuthController::class, 'tokens'])
+        ->name('admin.tokens.index');
+
     Route::get('/admin/users/create', [AdminUserController::class, 'create'])
         ->name('admin.users.create');
+    // deleted users List
+    Route::get('/admin/users/deleted', [AdminUserController::class, 'deleted'])
+        ->name('admin.users.deleted');
 
     Route::post('/admin/users', [AdminUserController::class, 'store'])
         ->name('admin.users.store');
@@ -114,6 +187,13 @@ Route::middleware(AdminMiddleware::class)->group(function () {
 
     Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy'])
         ->name('admin.users.destroy');
+    Route::post('/admin/users/{id}/restore', [AdminUserController::class, 'restore'])
+        ->name('admin.users.restore');
+
+    Route::delete('/admin/users/{id}/force-delete', [AdminUserController::class, 'forceDelete'])
+        ->name('admin.users.force-delete');
+    Route::post('/admin/users/{user}/status', [AdminUserController::class, 'toggleStatus'])
+        ->name('admin.users.toggle-status');
 
     Route::get('/admin/managers', [AdminManagerController::class, 'index'])
         ->name('admin.managers.index');
@@ -132,4 +212,13 @@ Route::middleware(AdminMiddleware::class)->group(function () {
 
     Route::post('/admin/managers', [AdminManagerController::class, 'store'])
         ->name('admin.managers.store');
+    Route::get('/admin/managers/deleted', [AdminManagerController::class, 'deleted'])
+        ->name('admin.managers.deleted');
+    Route::post('/admin/managers/{id}/restore', [AdminManagerController::class, 'restore'])
+        ->name('admin.managers.restore');
+
+    // ChatBot Route
+
+
+
 });

@@ -1,55 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Status</title>
+@extends('layouts.user')
+
+@section('title', __('messages.account_status'))
+
+@section('styles')
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: ui-sans-serif, system-ui, sans-serif; background: #f8fafc; color: #111827; }
-        nav { background: #1e293b; color: white; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
-        nav a { color: white; text-decoration: none; padding: 8px 16px; margin: 0 8px; border-radius: 6px; }
-        nav a:hover { background: #334155; }
-        .container { max-width: 900px; margin: 32px auto; padding: 20px; }
-        .card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 28px; box-shadow: 0 10px 30px rgba(15,23,42,.08); }
-        .button { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
-        .button:hover { background: #1d4ed8; }
-        .user-info { display: flex; flex-direction: column; gap: 4px; }
-        .user-info span { opacity: 0.85; }
-        .status-item { margin-top: 16px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; background: #f8fafc; }
+        .container {
+            max-width: 900px;
+        }
+
+        .status-item {
+            margin-top: 16px;
+            padding: 16px;
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            background: var(--color-surface-alt);
+        }
     </style>
-</head>
-<body>
-    <nav>
-        <div>
-            <a href="{{ route('dashboard') }}">Dashboard</a>
-            <a href="{{ route('status') }}">Status</a>
-            <a href="{{ route('requests') }}">Requests</a>
-            <a href="{{ route('token.generate') }}">Generate Token</a>
-        </div>
-        <div class="user-info">
-            <strong>{{ auth()->user()->name }}</strong>
-            <span>{{ auth()->user()->email }}</span>
-        </div>
-        <form method="POST" action="{{ route('logout') }}" style="display:inline;">
-            @csrf
-            <button type="submit" class="button" style="background:#dc2626;">Logout</button>
-        </form>
-    </nav>
+@endsection
+
+@section('user_content')
 
     <div class="container">
         <div class="card">
-            <h1>Account Status</h1>
+            <h1>{{ __('messages.account_status') }}</h1>
             <div class="status-item">
-                <strong>Name:</strong> {{ auth()->user()->name }}
+                <strong>{{ __('messages.label_name') }}:</strong> {{ auth()->user()->name }}
             </div>
             <div class="status-item">
-                <strong>Email:</strong> {{ auth()->user()->email }}
+                <strong>{{ __('messages.label_email') }}:</strong> {{ auth()->user()->email }}
             </div>
             <div class="status-item">
-                <strong>Registered:</strong> {{ auth()->user()->created_at->format('Y-m-d') }}
+                <strong>{{ __('messages.label_registered') }}:</strong> {{ auth()->user()->created_at->format('Y-m-d') }}
+            </div>
+            <div class="status-item">
+                <strong>{{ __('messages.account_status') }}:</strong>
+                @if (auth()->user()->disabled)
+                    <span class="status-disabled">{{ __('messages.disabled') }}</span>
+                @else
+                    <span class="status-active">{{ __('messages.active') }}</span>
+                @endif
             </div>
         </div>
-    </div>
-</body>
-</html>
+        <script src="http://localhost:4173/chatbot.iife.js" data-api-url="{{ url('/chat') }}"></script>
+
+@endsection

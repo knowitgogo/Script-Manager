@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Token;
+use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+class TokenService
+{
+    public function paginateForUser(User $user, int $perPage = 10): LengthAwarePaginator
+    {
+        return $user->tokens()
+            ->withCount(['usages as usages_24h_count' => function ($query) {
+                $query->where('created_at', '>=', now()->subHours(24));
+            }])
+            ->latest('created_at')
+            ->paginate($perPage);
+    }
+
+    public function getForUser(User $user)
+    {
+        return $user->tokens()
+            ->latest('created_at')
+            ->get();
+    }
+
+    public function paginateForAdmin(?string $search, int $perPage = 10): LengthAwarePaginator
+    {
+        return Token::query()
+            ->with('user')
+            ->withMax('usages', 'created_at')
+            ->where(function ($query) use ($search) {
+                if ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('token', 'like', "%{$search}%");
+                }
+            })
+            ->orderBy('usages_max_created_at', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+    }
+
+    public function totalCount(): int
+    {
+        return Token::query()->count('*');
+    }
+
+    public function createForUser(User $user, array $data): Token
+    {
+        return $user->tokens()->create([
+            'name' => $data['name'],
+            'token' => $data['token'],
+            'expires_at' => $data['expires_at'] ?? null,
+        ]);
+    }
+
+    public function updateName(Token $token, string $name): void
+    {
+        $token->name = $name;
+        $token->save();
+    }
+
+    public function delete(Token $token): void
+    {
+        Token::query()->whereKey($token->getKey())->delete();
+    }
+
+    public function toggleDisabled(Token $token): void
+    {
+        $token->disabled = ! $token->disabled;
+        $token->save();
+    }
+}
